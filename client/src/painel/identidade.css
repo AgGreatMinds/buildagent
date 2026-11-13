@@ -1,0 +1,366 @@
+/* Identidade visual do painel.
+   Regra-mãe: o quente (laranja/brasa) aparece DENTRO do frio (tinta + cobalto), nunca sozinho.
+   Aqui: tinta quente (#100E0D, nunca #000), cobalto só em linha fina, laranja só onde há ação/atividade.
+   Carrega depois de painel.css e redefine os tokens do bloco .painel; os seletores abaixo só refinam. */
+
+@font-face { font-family: "Space Grotesk"; font-weight: 500; font-display: swap; src: url("/assets/fonts/SpaceGrotesk-Medium.woff2") format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-weight: 700; font-display: swap; src: url("/assets/fonts/SpaceGrotesk-Bold.woff2") format("woff2"); }
+/* General Sans é opcional: a licença dela (ITF Free Font License) não deixa redistribuir o arquivo, então ele
+   não vem no repositório. Quem tiver a fonte põe em client/public/local/fonts/ (fora do git); sem ela, o corpo
+   usa a fonte do sistema (ver --ia-corpo). */
+@font-face { font-family: "General Sans"; font-weight: 400 700; font-display: swap; src: url("/local/fonts/GeneralSans-Variable.woff2") format("woff2"); }
+
+:root {
+  --ia-tinta: #100e0d;
+  --ia-superficie: #171412;
+  --ia-superficie-2: #1f1b18;
+  --ia-papel: #f6f7f9;
+  --ia-apoio: #8a8a93;
+  --ia-laranja: #f4682a;
+  --ia-laranja-alto: #ff7a3d;
+  --ia-brasa: #d8281f;
+  --ia-cobalto: #2e7fd4;
+  --ia-linha: rgba(246, 247, 249, 0.08);
+  --ia-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --ia-corpo: "General Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.painel,
+.painel-barra,
+.painel-botoes-ajuda, /* o "?" do rodapé não é .painel: sem os tokens ficava um glifo solto, sem fundo nem borda */
+#andares button {
+  --painel-bg: rgba(16, 14, 13, 0.97);
+  --painel-borda: 1px solid var(--ia-linha);
+  --painel-sombra: 0 18px 44px rgba(0, 0, 0, 0.5);
+  --painel-texto: var(--ia-papel);
+  --painel-texto-suave: #a7a7b0;
+  --painel-texto-mudo: var(--ia-apoio);
+  --painel-fundo-item: rgba(246, 247, 249, 0.045);
+  --painel-fundo-item-on: rgba(246, 247, 249, 0.1);
+  --painel-acao: var(--ia-laranja);
+  --painel-raio: 10px;
+  --painel-raio-pq: 7px;
+  --status-working: var(--ia-laranja-alto);
+  --status-waiting: #ff5a4d;
+  --status-shell: #5a9fe6;
+  --status-idle: var(--ia-apoio);
+  --status-done: #6e6e77;
+  --status-offline: #54545c;
+  /* Uso: frio enquanto há folga; quente só quando aperta. */
+  --uso-ok: var(--ia-cobalto);
+  --uso-warn: var(--ia-laranja);
+  --uso-crit: #ef4337;
+  font-family: var(--ia-corpo);
+  font-feature-settings: "tnum" 1;
+}
+
+/* Assinatura: fio fino de cobalto com um dente laranja de 28 px no início (quente dentro do frio). */
+.painel-lista::before,
+.painel-barra::before,
+.painel-replay::before,
+.painel-feed::before,
+.painel-uso::before,
+.painel-config::before,
+dialog.painel::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ia-laranja) 0 28px, var(--ia-cobalto) 28px 100%);
+  opacity: 0.9;
+  pointer-events: none;
+  border-radius: inherit;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.painel-barra, .painel-replay, .painel-feed, .painel-uso, .painel-config, dialog.painel { position: fixed; }
+.painel-lista { position: fixed; }
+
+/* Títulos: Space Grotesk 700, a voz de display da marca. */
+.painel h2,
+.painel-barra-marca,
+.painel-barra-valor,
+.painel-lista-cab h2 {
+  font-family: var(--ia-display);
+  letter-spacing: -0.01em;
+}
+
+/* ------------------------------ lista de agentes ------------------------------ */
+.painel-lista {
+  background: linear-gradient(180deg, #14110f 0%, var(--ia-tinta) 38%);
+  border-right: 1px solid var(--ia-linha);
+}
+.painel-lista-cab { padding: 16px 16px 12px; border-bottom: 0; }
+.painel-lista-cab h2 { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.painel-lista-cab h2::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: var(--ia-simbolo, url("/icons/simbolo.svg")) center / contain no-repeat; /* --ia-simbolo: marca local, ver barra.ts */
+  flex: none;
+}
+.painel-lista-filtros { padding: 0 16px 12px; border-bottom: 1px solid var(--ia-linha); gap: 8px; }
+.painel-lista-filtros input,
+.painel-lista-filtros select {
+  background: var(--ia-superficie);
+  border: 1px solid var(--ia-linha);
+  border-radius: 8px;
+  color: var(--ia-papel);
+  font: 13px var(--ia-corpo);
+  padding: 8px 10px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.painel-lista-filtros input:focus,
+.painel-lista-filtros select:focus { outline: none; border-color: var(--ia-cobalto); box-shadow: 0 0 0 3px rgba(46, 127, 212, 0.22); }
+.painel-lista-corpo { overflow-x: hidden; padding: 6px 8px 24px; scrollbar-width: thin; scrollbar-color: rgba(246, 247, 249, 0.18) transparent; }
+
+/* Sala (projeto): quadradinho laranja + nome em caixa alta de apoio. */
+.painel-sala { margin-top: 16px; }
+.painel-sala-rotulo { font-family: var(--ia-display); font-weight: 500; font-size: 11px; letter-spacing: 0.1em; color: var(--ia-apoio); padding: 4px 10px 8px; }
+.painel-sala-nome::before { content: ""; display: inline-block; width: 6px; height: 6px; background: var(--ia-laranja); margin-right: 8px; transform: translateY(-1px); }
+.painel-sala-acao { opacity: 0; background: transparent; transition: opacity 0.15s; }
+.painel-sala-rotulo:hover .painel-sala-acao { opacity: 1; }
+/* Toque não tem hover: renomear/mover ficam sempre visíveis (alvo invisível não é alvo). */
+@media (hover: none) { .painel-sala-acao { opacity: 1; } }
+
+/* Agente: avatar + corpo em 3 linhas. */
+.painel-agente { grid-template-columns: 36px 1fr; gap: 0 12px; align-items: start; padding: 10px; border-radius: 10px; position: relative; transition: background 0.12s; }
+.painel-agente:hover { background: var(--painel-fundo-item); }
+.painel-agente.selecionado { background: var(--ia-superficie-2); box-shadow: inset 2px 0 0 var(--ia-laranja); }
+/* Largura = 100% menos o recuo: com `width:100%` + margem o filho estourava 22 px a sala (324 > 302). */
+.painel-agente-filho { border-left: 1px solid rgba(46, 127, 212, 0.35); margin-left: 22px; width: calc(100% - 22px); padding-left: 10px; border-radius: 0 10px 10px 0; }
+.painel-agente-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--ia-superficie-2);
+  border: 1px solid var(--ia-linha);
+  color: var(--ia-papel);
+  font: 700 15px var(--ia-display);
+}
+.painel-agente-avatar.status-working { border-color: var(--ia-laranja); color: var(--ia-laranja-alto); background: rgba(244, 104, 42, 0.1); }
+.painel-agente-avatar.status-waiting { border-color: #ff5a4d; color: #ff8a80; background: rgba(216, 40, 31, 0.14); }
+.painel-agente-avatar.status-shell { border-color: var(--ia-cobalto); color: #7db6f0; background: rgba(46, 127, 212, 0.1); }
+.painel-agente-avatar.status-idle, .painel-agente-avatar.status-done, .painel-agente-avatar.status-offline { color: var(--ia-apoio); }
+.painel-agente-corpo { min-width: 0; display: grid; gap: 3px; }
+.painel-agente-linha1 { justify-content: space-between; gap: 8px; }
+.painel-agente-nome { font: 700 14px var(--ia-display); letter-spacing: -0.005em; }
+.painel-agente-linha2 { font-size: 12.5px; color: var(--painel-texto-suave); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 1.2em; }
+.painel-agente-linha3 { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--ia-apoio); white-space: nowrap; overflow: hidden; }
+.painel-agente-modelo { font-family: var(--ia-display); font-weight: 500; font-size: 11px; color: var(--ia-apoio); overflow: hidden; text-overflow: ellipsis; }
+.painel-agente-tempo { font-variant-numeric: tabular-nums; }
+.painel-agente-tempo::after { content: " ·"; opacity: 0.6; }
+
+/* Selos: pílulas finas, sem fundo colorido gritante. */
+.painel-selo { border-radius: 5px; font: 500 10.5px/1.5 var(--ia-display); letter-spacing: 0.04em; padding: 1px 7px; }
+.painel-selo-status { text-transform: uppercase; letter-spacing: 0.07em; background: transparent; padding: 1px 0; }
+.painel-selo-status.status-working { background: rgba(244, 104, 42, 0.14); padding: 1px 7px; }
+.painel-selo-status.status-waiting { background: rgba(216, 40, 31, 0.18); padding: 1px 7px; }
+.painel-selo-status.status-working::before { animation: ia-pulso 1.6s ease-in-out infinite; }
+.painel-selo-provedor { background: transparent; border: 1px solid var(--ia-linha); color: var(--painel-texto-suave); }
+@keyframes ia-pulso { 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .painel-selo-status.status-working::before { animation: none; } }
+
+/* ------------------------------ barra superior ------------------------------ */
+.painel-barra { background: color-mix(in srgb, var(--ia-tinta) 90%, transparent); border-radius: 12px; padding: 8px 12px; gap: 6px 18px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32); } /* mais leve sobre o prédio: 90% de tinta e sombra curta (era 0.97 + sombra de 44 px) */
+.painel-barra-marca { font-size: 15px; font-weight: 700; gap: 9px; }
+/* O nome "BuildAgent" já está no rodapé (#hud): abaixo de 1700 px a barra fica só com o glifo e cabe numa linha em 1440. */
+@media (max-width: 1699px) { .painel-barra-marca span { display: none; } }
+.painel-barra-logo { width: 20px; height: 20px; border-radius: 0; content: var(--ia-simbolo, url("/icons/simbolo.svg")); }
+.painel-barra-contador { gap: 6px; }
+.painel-barra-valor { font-family: var(--ia-display); font-size: 17px; font-weight: 700; }
+.painel-barra-rotulo { font-size: 11.5px; color: var(--ia-apoio); letter-spacing: 0; }
+.painel-barra-contador.c-precisamDeVoce.ativo .painel-barra-valor,
+.painel-barra-contador.c-precisamDeVoce.ativo .painel-barra-rotulo { color: var(--ia-laranja-alto); }
+.painel-barra-btn { background: transparent; border: 1px solid transparent; color: var(--painel-texto-suave); font: 500 12.5px var(--ia-corpo); padding: 6px 9px; border-radius: 8px; } /* 9 px (era 11): os 8 botões cabem ao lado dos contadores em 1440 */
+.painel-barra-botoes { gap: 2px; }
+.painel-barra-btn:hover { background: var(--painel-fundo-item-on); color: var(--ia-papel); }
+.painel-barra-btn:focus-visible, .painel-botoes:focus-visible, #andares button:focus-visible { outline: 2px solid var(--ia-cobalto); outline-offset: 2px; }
+
+/* Botão flutuante da lista (painel recolhido). */
+.painel-lista-flutuante { display: grid; left: 14px; top: 14px; bottom: auto; width: 42px; height: 42px; border-radius: 10px; }
+@media (max-width: 800px) { .painel-lista-flutuante { width: 44px; height: 44px; } } /* alvo de toque */
+
+/* Botões de ícone (✕ ‹ ›): quadrados discretos. */
+.painel-botoes { background: transparent; border: 1px solid var(--ia-linha); border-radius: 8px; color: var(--painel-texto-suave); width: 28px; height: 28px; cursor: pointer; transition: background 0.12s, color 0.12s; }
+.painel-botoes:hover { background: var(--painel-fundo-item-on); color: var(--ia-papel); }
+@media (max-width: 800px) { .painel-botoes { width: 44px; height: 44px; } } /* alvo de toque */
+
+/* ------------------------------ elevador (andares) ------------------------------ */
+#andares button { font: 500 12.5px var(--ia-display); border-radius: 8px; background: rgba(16, 14, 13, 0.97); border: 1px solid var(--ia-linha); color: var(--painel-texto-suave); }
+#andares button:hover { background: var(--ia-superficie-2); color: var(--ia-papel); }
+#andares button.ativo { background: var(--ia-laranja); border-color: var(--ia-laranja); color: var(--ia-tinta); font-weight: 700; }
+
+/* ------------------------------ diálogos (Meu dia, Histórico, Config, Ajuda, Como ativar) ------------------------------ */
+dialog.painel, .painel-config {
+  background: var(--ia-tinta);
+  border: 1px solid var(--ia-linha);
+  border-radius: 14px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  padding-top: 4px;
+}
+dialog.painel::backdrop { background: rgba(8, 7, 6, 0.62); }
+dialog.painel h2, .painel-config h2 { font: 700 20px var(--ia-display); letter-spacing: -0.015em; }
+.painel-historico-cab, .painel-meudia-cab, .painel-config-cab { padding-bottom: 10px; }
+
+/* Meu dia: cartões em superfície quente, números em Space Grotesk. */
+.painel-meudia-kpi, .painel-meudia-cartao, .painel-meudia-destaque {
+  background: var(--ia-superficie);
+  border: 1px solid var(--ia-linha);
+  border-radius: 12px;
+}
+.painel-meudia-kpi-valor, .painel-meudia-valor { font-family: var(--ia-display); font-weight: 700; letter-spacing: -0.02em; }
+.painel-meudia-kpi.destaque, .painel-meudia-kpi.ativo { border-color: rgba(244, 104, 42, 0.55); background: linear-gradient(180deg, rgba(244, 104, 42, 0.1), var(--ia-superficie)); }
+
+/* Histórico: itens como linhas limpas, título à frente. */
+.painel-historico-item { background: transparent; border-radius: 8px; padding: 9px 10px; border: 1px solid transparent; transition: background 0.12s, border-color 0.12s; }
+.painel-historico-item:hover { background: var(--ia-superficie); border-color: var(--ia-linha); }
+.painel-historico-dia-label { font: 500 11px var(--ia-display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ia-apoio); }
+.painel-historico-filtros input, .painel-historico-filtros select { background: var(--ia-superficie); border: 1px solid var(--ia-linha); border-radius: 8px; color: var(--ia-papel); padding: 8px 10px; }
+
+/* Contas · uso */
+.painel-uso { background: var(--ia-tinta); border-radius: 12px; box-shadow: var(--painel-sombra); }
+.painel-uso-chip { background: var(--ia-superficie); border: 1px solid var(--ia-linha); border-radius: 10px; }
+.painel-uso-chip-msg-texto { color: var(--ia-apoio); font-size: 12px; }
+.painel-uso-chip-como { background: transparent; border: 1px solid var(--ia-linha); color: var(--painel-texto-suave); border-radius: 6px; font-size: 11px; padding: 2px 8px; cursor: pointer; }
+.painel-uso-chip-como:hover { border-color: var(--ia-cobalto); color: var(--ia-papel); }
+
+/* Linha de interruptor com estado longo ("Bloqueadas pelo navegador…"): o estado desce para uma linha
+   própria em vez de espremer o rótulo até "Notifi…". */
+.painel-avisos-prefs-linha:has(.painel-avisos-prefs-estado:not(:empty)) { flex-wrap: wrap; row-gap: 2px; }
+.painel-avisos-prefs-linha .painel-avisos-prefs-estado:not(:empty) { order: 3; flex: 1 0 100%; }
+
+/* Interruptor (avisos/Config) como alvo de toque (≤ 800 px): o trilho visível segue 34×20;
+   12 px de borda transparente em volta fazem a área de 58×44 e a margem negativa devolve
+   o espaço ao layout. O fio de 1 px vira sombra interna (a borda agora é a área de toque)
+   e o raio cresce 12 px para o canto do trilho continuar redondo. */
+@media (max-width: 800px) {
+  .painel-avisos-switch {
+    width: 58px;
+    height: 44px;
+    margin: -12px 0 -12px -24px; /* a área sobra para a esquerda: a linha não estoura à direita */
+    border: 12px solid transparent;
+    border-radius: 22px;
+    background-clip: padding-box;
+    box-shadow: inset 0 0 0 1px var(--ia-linha);
+  }
+  /* `.ligado` usa o atalho `background:`, que zera o clip: o laranja vazava na borda de toque (halo de 58×44). */
+  .painel-avisos-switch.ligado { background-clip: padding-box; }
+}
+
+/* Atividade (feed): cartão flutuante embaixo, alinhado ao espaço que sobra ao lado da lista. */
+.painel-feed {
+  left: calc(var(--lista-w, 320px) + 16px);
+  right: 16px;
+  bottom: 16px;
+  max-height: 38vh;
+  background: var(--ia-tinta);
+  border: 1px solid var(--ia-linha);
+  border-radius: 12px;
+  box-shadow: var(--painel-sombra);
+  overflow: hidden;
+  transition: transform 0.22s ease, opacity 0.18s ease;
+}
+.painel-feed.fechada { transform: translateY(24px); opacity: 0; pointer-events: none; visibility: hidden; }
+.painel-feed-cab { padding: 12px 14px; }
+.painel-feed-cab h2 { font: 700 14px var(--ia-display); }
+.painel-feed-corpo { overflow-y: auto; scrollbar-width: thin; }
+.painel-feed-linha { padding: 6px 14px; }
+.painel-feed-linha time, .painel-feed-tempo { color: var(--ia-apoio); font-variant-numeric: tabular-nums; }
+.painel-feed-quem { font-family: var(--ia-display); font-weight: 700; }
+
+/* Replay: player flutuante embaixo, ACIMA do rodapé (#hud a 34 px + #keys a 14 px — sobe
+   para 60 px) e longe da coluna da direita (avisos, "?", flutuante do feed: 14 + 44 px de
+   alvo + folga = 70 px reservados de cada lado, simétrico porque o player é centrado).
+   `border-box`: a largura já conta padding e borda (antes passava 38 px da conta). */
+.painel-replay {
+  left: calc(var(--lista-w, 320px) + (100vw - var(--lista-w, 320px)) / 2);
+  transform: translateX(-50%);
+  bottom: 60px;
+  z-index: 13;
+  box-sizing: border-box;
+  width: min(760px, calc(100vw - var(--lista-w, 320px) - 140px));
+  background: var(--ia-tinta);
+  border: 1px solid var(--ia-linha);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  padding: 16px 18px 14px;
+  color: var(--ia-papel);
+  display: grid;
+  gap: 12px;
+  font: 13px var(--ia-corpo);
+}
+.painel-replay[hidden] { display: none; }
+.painel-replay-cab { display: flex; align-items: center; gap: 12px; }
+.painel-replay-cab .grow { flex: 1; }
+.painel-replay-titulo { font: 700 16px var(--ia-display); }
+.painel-replay-titulo::before { content: ""; display: inline-block; width: 8px; height: 8px; background: var(--ia-laranja); margin-right: 9px; }
+.painel-replay-relogio { font: 700 20px var(--ia-display); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.painel-replay-dia { background: var(--ia-superficie); color: var(--ia-papel); border: 1px solid var(--ia-linha); border-radius: 8px; padding: 6px 10px; font: 500 12.5px var(--ia-corpo); }
+.painel-replay-vivo { background: transparent; color: var(--ia-laranja-alto); border: 1px solid rgba(244, 104, 42, 0.5); border-radius: 8px; padding: 6px 12px; font: 500 12.5px var(--ia-corpo); cursor: pointer; }
+.painel-replay-vivo:hover { background: rgba(244, 104, 42, 0.14); }
+.painel-replay-controles { display: flex; align-items: center; gap: 14px; }
+.painel-replay-play { min-width: 82px; background: var(--ia-laranja); color: var(--ia-tinta); border: 0; border-radius: 8px; padding: 8px 14px; font: 700 13px var(--ia-display); cursor: pointer; }
+.painel-replay-play:hover { background: var(--ia-laranja-alto); }
+.painel-replay-barra { flex: 1; accent-color: var(--ia-laranja); height: 4px; cursor: pointer; }
+.painel-replay-vels { display: flex; gap: 4px; }
+.painel-replay-vel { background: transparent; border: 1px solid var(--ia-linha); color: var(--painel-texto-suave); border-radius: 6px; padding: 5px 9px; font: 500 12px var(--ia-display); cursor: pointer; }
+.painel-replay-vel.ativo { border-color: var(--ia-cobalto); color: var(--ia-papel); background: rgba(46, 127, 212, 0.16); }
+.painel-replay-aviso { margin: 0; color: var(--ia-apoio); font-size: 12.5px; }
+.painel-replay-aviso[hidden] { display: none; }
+/* Gaveta de detalhe aberta (≥ 1200 px): o player recentra no espaço que sobrou, como a barra. */
+@media (min-width: 1200px) {
+  body:has(.painel-detalhe:not(.fechada)) .painel-replay {
+    left: calc(var(--lista-w, 320px) + (100vw - var(--lista-w, 320px) - var(--det-w)) / 2);
+    width: min(760px, calc(100vw - var(--lista-w, 320px) - var(--det-w) - 140px));
+  }
+}
+/* Celular: o player encosta à esquerda (12 px) e deixa os 70 px da coluna da direita. */
+@media (max-width: 760px) {
+  .painel-replay { left: 12px; right: 70px; width: auto; transform: none; padding: 12px; }
+}
+/* ≤ 800 px: alvos de toque com ≥ 44 px; o player fica estreito (≤ 340 px), então cabeçalho
+   e controles quebram linha e a linha do tempo ganha a linha inteira. */
+@media (max-width: 800px) {
+  .painel-replay-play, .painel-replay-vivo { min-height: 44px; }
+  .painel-replay-vel { min-width: 44px; min-height: 44px; }
+  .painel-replay-cab, .painel-replay-controles { flex-wrap: wrap; row-gap: 8px; }
+  .painel-replay-barra { order: -1; flex: 1 1 100%; }
+}
+
+/* ------------------------------ gaveta de detalhe aberta: nada fica por baixo dela ------------------------------ */
+/* Largura única da gaveta (o .painel-detalhe usa a mesma variável); aberta, o que vive no canto direito
+   (elevador de andares, sino, "?") e a barra superior recuam para o espaço que sobrou. */
+:root { --det-w: min(92vw, 400px); }
+/* Celular: a gaveta ocupa a tela inteira — a fresta de 8% mostrava pedaços da barra e do rodapé por trás. */
+@media (max-width: 760px) { :root { --det-w: 100vw; } }
+/* A gaveta fica acima de tudo; só em tela larga o resto recua (em tela estreita ela simplesmente cobre). */
+.painel-detalhe { z-index: 14; }
+/* Sonda invisível: main.ts lê a largura dela para centralizar a cena 3D no vão livre (0 = detalhe fechado). */
+.sonda-detalhe { position: fixed; top: 0; right: 0; width: 0; height: 0; visibility: hidden; pointer-events: none; }
+@media (min-width: 1200px) {
+body:has(.painel-detalhe:not(.fechada)) .sonda-detalhe { width: var(--det-w); }
+body:has(.painel-detalhe:not(.fechada)) #andares { right: calc(var(--det-w) + 16px); }
+body:has(.painel-detalhe:not(.fechada)) .painel-avisos,
+body:has(.painel-detalhe:not(.fechada)) .painel-feed-flutuante,
+body:has(.painel-detalhe:not(.fechada)) .painel-botoes-ajuda { right: calc(var(--det-w) + 14px); }
+body:has(.painel-detalhe:not(.fechada)) .painel-barra {
+  left: calc(var(--lista-w, 320px) + (100vw - var(--lista-w, 320px) - var(--det-w)) / 2);
+  max-width: calc(100vw - var(--lista-w, 320px) - var(--det-w) - var(--barra-folga, 40px));
+}
+/* Rodapé (atalhos e estado) para antes da gaveta: os atalhos quebram linha, o estado ganha "…" — nunca por baixo dela. */
+body:has(.painel-detalhe:not(.fechada)) #keys,
+body:has(.painel-detalhe:not(.fechada)) #hud { right: calc(var(--det-w) + 16px); }
+}
+.painel-barra, #andares, .painel-avisos { transition: left 0.22s ease, right 0.22s ease; }
+/* Celular: a gaveta de detalhe cobre a lista aberta por inteiro — sem a lista "furada" na
+   faixa de ~35 px ao lado. A lista segue aberta por baixo: fechar o detalhe a devolve. */
+@media (max-width: 760px) {
+  body:has(.painel-detalhe:not(.fechada)) .painel-lista { visibility: hidden; }
+  /* Diálogos: largura conta padding e borda (94vw + 34 px passavam da tela em 360/390). */
+  dialog.painel, .painel-ajuda, .painel-config, .painel-uso-dialogo { box-sizing: border-box; }
+}

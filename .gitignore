@@ -1,0 +1,17 @@
+node_modules/
+dist/
+tmp/
+.claude/
+PLANO.md
+.DS_Store
+client/public/local/
+# Anotações e planos de trabalho de quem mantém o projeto (não fazem parte do código)
+interno/
+PLANO-FINALIZACAO.md
+# Cópia de referência do projeto de origem (ver NOTICE.md)
+ref-habblaud/
+# Segredos e configuração local nunca entram
+.env
+.env.*
+!.env.example
+*.log

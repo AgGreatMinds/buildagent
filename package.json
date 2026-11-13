@@ -1,0 +1,49 @@
+{
+  "name": "buildagent",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Prédio 3D que mostra, em tempo real, o que os seus agentes de IA estão fazendo (Claude Code, Codex, OpenCode, Pi, OpenBot).",
+  "keywords": [
+    "ai-agents",
+    "claude-code",
+    "codex",
+    "opencode",
+    "threejs",
+    "dashboard",
+    "visualization"
+  ],
+  "license": "MIT",
+  "author": "BuildAgent contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AgGreatMinds/buildagent.git"
+  },
+  "homepage": "https://github.com/AgGreatMinds/buildagent#readme",
+  "bugs": {
+    "url": "https://github.com/AgGreatMinds/buildagent/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env server/index.ts",
+    "start": "tsx --env-file-if-exists=.env server/index.ts",
+    "demo": "tsx --env-file-if-exists=.env server/index.ts --demo",
+    "dev:client": "vite --config vite.config.ts",
+    "build": "vite build --config vite.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/three": "0.170.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vitest": "^5.1.0"
+  }
+}

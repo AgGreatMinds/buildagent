@@ -1,0 +1,412 @@
+/* Faixa "Contas · uso" sob a barra superior: cartões legíveis para as contas com número
+   (plano, % da janela mais apertada em destaque, duas medidas de 6 px) e chips no fim para as sem número
+   (aberta ≈ 60 px; recolhida ≈ 28 px com o pior 5 h e a pior semana),
+   centralizada na área à direita da lista e com a largura do próprio conteúdo.
+   Importado só por uso.ts. Cores só por tokens (--ia-*, --uso-*, --painel-*) de
+   identidade.css. Sem backdrop-filter (custa quadro com o WebGL atrás) — fundo opaco.
+   Os seletores da raiz usam `.painel.painel-uso` (0,2,0) de propósito: identidade.css
+   carrega depois e define `.painel-uso` (raio 12 px + sombra pesada); aqui ganha sem !important. */
+
+/* ---------- faixa ---------- */
+/* top: logo abaixo da barra (--barra-h é medida em barra.ts via ResizeObserver). */
+.painel.painel-uso {
+  position: fixed;
+  top: calc(12px + var(--barra-h, 52px) + 6px);
+  left: calc(var(--lista-w, 320px) + (100vw - var(--lista-w, 320px)) / 2);
+  transform: translateX(-50%);
+  z-index: 11;
+  width: max-content;
+  max-width: calc(100vw - var(--lista-w, 320px) - 40px);
+  max-height: none;
+  overflow: visible;
+  display: flex;
+  flex-direction: row; /* painel.css define `column` em .painel-uso: sem isto o chevron caía embaixo (faixa de 77 px) e os cartões vazavam da tela */
+  align-items: center;
+  gap: 6px;
+  padding: 5px 5px 5px 6px;
+  background: color-mix(in srgb, var(--ia-tinta) 92%, transparent); /* mesmo peso da barra logo acima (era tinta opaca) */
+  border: 1px solid var(--ia-linha);
+  border-radius: 10px;
+  box-shadow: none; /* fundo opaco + fio de 1 px já separam da cena 3D; anula a sombra pesada da identidade */
+  color: var(--ia-papel);
+  font: 500 12px/16px var(--ia-corpo);
+  transition: left 0.22s ease, max-width 0.22s ease;
+  /* Tokens de componente da faixa — a cor diz o nível, sem competir com o laranja da marca
+     (que continua sendo "atividade" na lista). Escopados aqui: os --uso-* globais servem
+     também à gaveta, que fica como está. */
+  --faixa-normal: color-mix(in srgb, var(--ia-cobalto) 85%, var(--ia-superficie)); /* cobalto calmo */
+  --faixa-atencao: #f2a93b; /* âmbar: atenção, distinto do laranja de atividade */
+  --faixa-critico: var(--ia-brasa); /* brasa: barra, moldura e brilho */
+  --faixa-critico-texto: color-mix(in srgb, var(--ia-brasa) 70%, var(--ia-papel)); /* brasa clareada: texto AA sobre o véu */
+}
+/* Assinatura da marca (fio cobalto com dente laranja) mais fina nesta faixa baixa. */
+.painel.painel-uso::before { height: 1px; opacity: 0.7; }
+
+/* ---------- corpo: contas lado a lado; não coube → rola na horizontal, um cartão por vez ----------
+   O lado com conta escondida esmaece (rola-ini / rola-fim, medidos em uso.ts): à direita largo
+   (56 px), para o cartão da borda ler como "continua"; à esquerda só 20 px, o mesmo tanto do
+   scroll-padding — o cartão alinhado começa onde o esmaecido acaba e fica inteiro legível, e do
+   anterior sobra só a margem interna (antes sobravam 19 px com pedaços de número). */
+.painel-uso-trilho {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.painel-uso-corpo {
+  display: flex;
+  align-items: center; /* chips (26 px) centrados na altura dos cartões */
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 20px; /* igual à largura do esmaecido da esquerda: o cartão alinhado não fica sob ele */
+  scrollbar-width: none;
+}
+.painel-uso-corpo::-webkit-scrollbar { display: none; }
+.painel-uso-corpo.rola-fim { mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); }
+.painel-uso-corpo.rola-ini { mask-image: linear-gradient(90deg, transparent 0, #000 20px); }
+.painel-uso-corpo.rola-ini.rola-fim { mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 56px), transparent); }
+
+/* Setas ‹ ›: coluna própria à direita, FORA da área que rola — os cartões terminam antes dela.
+   As duas reservam o lugar juntas; a do lado sem mais conta fica desabilitada e invisível. */
+.painel-uso-setas { flex: none; display: flex; gap: 2px; }
+.painel-uso-setas[hidden] { display: none; }
+.painel-uso-seta {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--ia-papel) 14%, transparent);
+  border-radius: 50%;
+  background: var(--ia-superficie-2);
+  color: var(--ia-papel);
+  cursor: pointer;
+  transition: background-color 0.12s ease-out, border-color 0.12s ease-out, transform 0.12s ease-out, opacity 0.15s ease-out;
+}
+.painel-uso-seta:disabled { opacity: 0; pointer-events: none; }
+.painel-uso-seta:hover { background: var(--ia-superficie); border-color: var(--ia-cobalto); }
+.painel-uso-seta:active { transform: scale(0.94); }
+.painel-uso-seta:focus-visible { outline: 2px solid var(--ia-cobalto); outline-offset: 1px; }
+
+/* ---------- cartão (conta com número): [logo nome PLANO / herói % + legenda] | medidas ---------- */
+.painel-uso-cartao {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: auto auto; /* identidade + herói · medidas */
+  align-items: center;
+  column-gap: 16px;
+  padding: 6px 12px 6px 10px;
+  border: 1px solid var(--ia-linha);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ia-papel) 2.5%, transparent);
+  scroll-snap-align: start;
+  transition: background-color 0.15s ease-out, border-color 0.15s ease-out;
+}
+/* Logo do provedor: 14 px, sem caixa, na linha do nome. */
+.painel-uso-logo {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+}
+.painel-uso-logo svg { width: 14px; height: 14px; display: block; }
+
+/* Identidade: nome · PLANO · antigo, e embaixo o herói. */
+.painel-uso-id { display: grid; gap: 1px; min-width: 0; }
+.painel-uso-id-topo { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.painel-uso-nome {
+  max-width: 132px;
+  font: 500 12.5px/16px var(--ia-corpo);
+  color: var(--ia-papel);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.painel-uso-plano {
+  flex: none;
+  padding: 0 5px;
+  border: 1px solid color-mix(in srgb, var(--ia-papel) 16%, transparent);
+  border-radius: 4px;
+  font: 500 12px/16px var(--ia-corpo); /* "Plus"/"Max" em caixa baixa a 12 px: legível sem caixa-alta miúda */
+  color: var(--painel-texto-suave);
+}
+/* "leitura antiga": aviso de frescor, não alerta — no cinza da legenda ("reinicia em"); a dica fica no title.
+   Âmbar é só nível de atenção do uso. */
+.painel-uso-antigo {
+  font: 400 12px/16px var(--ia-corpo);
+  color: var(--painel-texto-suave);
+  white-space: nowrap;
+  cursor: help;
+}
+.painel-uso-antigo[hidden] { display: none; }
+.painel-uso-antigo::before { content: "· "; color: var(--painel-texto-suave); }
+/* Herói: o % da janela mais apertada é o maior elemento do cartão (display 18 px tabular);
+   a legenda ao lado diz qual janela e quando zera. */
+.painel-uso-heroi { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+.painel-uso-heroi[hidden] { display: none; }
+.painel-uso-heroi-pct {
+  font: 600 18px/22px var(--ia-display);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ia-papel);
+}
+.painel-uso-heroi-legenda {
+  font: 400 12px/16px var(--ia-corpo);
+  color: var(--painel-texto-suave); /* era apoio (#8a8a93); suave sobe o contraste do "reinicia em" */
+  white-space: nowrap;
+}
+
+/* ---------- medidas: 5 h e semana empilhadas, colunas alinhadas ---------- */
+.painel-uso-medidas { display: grid; gap: 7px; }
+.painel-uso-cartao.antigo .painel-uso-medidas { opacity: 0.6; } /* leitura antiga: os números recuam */
+.painel-uso-medida {
+  display: grid;
+  grid-template-columns: max-content 72px 34px; /* rótulo · trilho · % */
+  align-items: center;
+  column-gap: 8px;
+  height: 16px;
+}
+.painel-uso-medida-rot {
+  min-width: 46px; /* "semana" e "5h" alinham o trilho na mesma coluna */
+  font: 500 12px/16px var(--ia-corpo);
+  color: var(--painel-texto-suave);
+  white-space: nowrap;
+}
+/* Trilho de 8 px; o preenchimento escala em X (GPU) a partir da esquerda. */
+.painel-uso-medida-trilho {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--painel-fundo-item-on);
+  overflow: hidden;
+}
+.painel-uso-medida-preench {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: var(--faixa-normal);
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Régua: cobalto calmo < 70% · âmbar 70–89% · brasa ≥ 90% (nivelDoUso em uso.ts). */
+.painel-uso-medida.nivel-warn .painel-uso-medida-preench { background: var(--faixa-atencao); }
+.painel-uso-medida.nivel-crit .painel-uso-medida-preench { background: var(--faixa-critico); }
+.painel-uso-medida-pct {
+  font: 600 12px/16px var(--ia-display);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--painel-texto-suave);
+}
+.painel-uso-medida.nivel-warn .painel-uso-medida-pct { color: var(--faixa-atencao); }
+.painel-uso-medida.nivel-crit .painel-uso-medida-pct { color: var(--faixa-critico-texto); }
+.painel-uso-medida.dim .painel-uso-medida-pct { color: var(--ia-apoio); font-weight: 500; }
+/* Uma janela só: o herói já diz o número e qual janela é — fica só a barra, mais longa. */
+.painel-uso-cartao.uma-janela .painel-uso-medida { grid-template-columns: 112px; }
+.painel-uso-cartao.uma-janela .painel-uso-medida-rot,
+.painel-uso-cartao.uma-janela .painel-uso-medida-pct { display: none; }
+
+/* Nível do cartão (janela mais apertada). Normal e atenção: só o número e a barra mudam de cor —
+   sem moldura. Crítico é o único que ganha moldura e brilho (a cor que salta é rara de propósito). */
+.painel-uso-cartao.nivel-warn .painel-uso-heroi-pct { color: var(--faixa-atencao); }
+.painel-uso-cartao.nivel-crit .painel-uso-heroi-pct { color: var(--faixa-critico-texto); }
+.painel-uso-cartao.nivel-crit {
+  border-color: color-mix(in srgb, var(--faixa-critico) 70%, transparent);
+  background: color-mix(in srgb, var(--faixa-critico) 12%, transparent);
+  /* brilho por dentro: a rolagem do corpo cortaria um brilho por fora */
+  box-shadow: inset 0 0 18px color-mix(in srgb, var(--faixa-critico) 22%, transparent);
+}
+.painel-uso-cartao.nivel-crit .painel-uso-heroi-legenda { color: color-mix(in srgb, var(--faixa-critico) 30%, var(--ia-papel)); }
+
+/* ---------- chip (conta sem número): [logo] nome · sem dados [?] — encolhe, não rouba largura ---------- */
+.painel-uso-msg,
+.painel-uso-como { display: none; }
+.painel-uso-cartao.chip {
+  grid-template-columns: auto auto auto; /* identidade · msg · ? */
+  column-gap: 6px;
+  padding: 0 8px 0 9px;
+  height: 26px;
+  background: transparent;
+}
+.painel-uso-cartao.chip .painel-uso-logo { opacity: 0.6; }
+.painel-uso-cartao.chip .painel-uso-logo,
+.painel-uso-cartao.chip .painel-uso-logo svg { width: 12px; height: 12px; }
+.painel-uso-cartao.chip .painel-uso-nome { max-width: 112px; font-size: 12px; color: var(--painel-texto-suave); }
+.painel-uso-cartao.chip .painel-uso-plano,
+.painel-uso-cartao.chip .painel-uso-heroi,
+.painel-uso-cartao.chip .painel-uso-medidas { display: none; }
+.painel-uso-cartao.chip .painel-uso-msg {
+  display: block;
+  font: 400 12px/16px var(--ia-corpo);
+  color: var(--ia-apoio);
+  white-space: nowrap;
+}
+/* "?" do Como ativar: círculo de 16 px (alvo maior no toque, abaixo). */
+.painel-uso-cartao.chip .painel-uso-como {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--ia-linha);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--painel-texto-suave);
+  font: 600 11px/1 var(--ia-display);
+  cursor: pointer;
+  transition: color 0.12s ease-out, border-color 0.12s ease-out;
+}
+.painel-uso-cartao.chip .painel-uso-como:hover { color: var(--ia-papel); border-color: var(--ia-cobalto); }
+.painel-uso-como:focus-visible { outline: 2px solid var(--ia-cobalto); outline-offset: 2px; }
+
+/* Nenhuma conta: uma linha só. */
+.painel-uso-vazio {
+  margin: 0;
+  padding: 0 8px;
+  font: 500 12px/24px var(--ia-corpo);
+  color: var(--ia-apoio);
+  white-space: nowrap;
+}
+
+/* ---------- chevron recolher/abrir ---------- */
+.painel-uso-recolher {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ia-apoio);
+  cursor: pointer;
+  transition: background-color 0.12s ease-out, color 0.12s ease-out;
+}
+.painel-uso-recolher:hover { background: var(--painel-fundo-item-on); color: var(--ia-papel); }
+.painel-uso-recolher:focus-visible { outline: 2px solid var(--ia-cobalto); outline-offset: 1px; }
+.painel-uso-recolher svg { transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1); }
+/* Recolhida: a seta aponta para baixo ("abrir"). */
+.painel-uso.recolhido .painel-uso-recolher svg { transform: rotate(180deg); }
+
+/* ---------- modo recolhido: ~28 px, uma pílula por conta com limite ("[logo] Codex 94% semana") ---------- */
+.painel-uso-resumo { display: none; }
+.painel.painel-uso.recolhido { padding: 2px 2px 2px 8px; gap: 8px; }
+.painel-uso.recolhido .painel-uso-trilho { display: none; }
+.painel-uso.recolhido .painel-uso-resumo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.painel-uso-resumo-pilula {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--ia-linha);
+  border-radius: 999px;
+}
+.painel-uso-resumo-pilula.nivel-crit {
+  border-color: color-mix(in srgb, var(--faixa-critico) 60%, transparent);
+  background: color-mix(in srgb, var(--faixa-critico) 12%, transparent);
+}
+.painel-uso-resumo-logo { display: grid; width: 12px; height: 12px; flex: none; }
+.painel-uso-resumo-logo svg { width: 12px; height: 12px; display: block; }
+.painel-uso-resumo-conta {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: 500 12px/16px var(--ia-corpo);
+  color: var(--ia-papel);
+}
+.painel-uso-resumo-pct { font: 600 12px/16px var(--ia-display); font-variant-numeric: tabular-nums; color: var(--ia-papel); }
+.painel-uso-resumo-pilula.nivel-warn .painel-uso-resumo-pct { color: var(--faixa-atencao); }
+.painel-uso-resumo-pilula.nivel-crit .painel-uso-resumo-pct { color: var(--faixa-critico-texto); }
+.painel-uso-resumo-rot { font: 400 12px/16px var(--ia-corpo); color: var(--painel-texto-suave); }
+.painel-uso-resumo-vazio { font: 400 12px/20px var(--ia-corpo); color: var(--ia-apoio); }
+.painel-uso.recolhido .painel-uso-recolher { width: 20px; height: 20px; }
+
+/* ---------- diálogo "Como ativar" (mesmo padrão da ajuda) ---------- */
+.painel-uso-dialogo {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  max-width: 460px;
+  width: min(92vw, 460px);
+  max-height: 82vh;
+  overflow-y: auto;
+  background: var(--ia-tinta);
+  border: 1px solid var(--ia-linha);
+  border-radius: 14px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  color: var(--ia-papel);
+  font: 13px/1.55 var(--ia-corpo);
+  padding: 16px 18px;
+}
+.painel-uso-dialogo::backdrop { background: rgba(8, 7, 6, 0.62); }
+.painel-uso-dialogo-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.painel-uso-dialogo-cab h2 {
+  margin: 0;
+  font: 700 17px var(--ia-display);
+  letter-spacing: -0.01em;
+}
+.painel-uso-dialogo-corpo { margin-top: 10px; }
+.painel-uso-dialogo-corpo p { margin: 6px 0; color: var(--painel-texto-suave); }
+
+/* ---------- gaveta de detalhe aberta (≥ 1200 px): a faixa recentra no espaço que sobrou ----------
+   Mesmo cálculo da barra em identidade.css; abaixo de 1200 px a gaveta cobre, como cobre a barra. */
+@media (min-width: 1200px) {
+  body:has(.painel-detalhe:not(.fechada)) .painel.painel-uso {
+    left: calc(var(--lista-w, 320px) + (100vw - var(--lista-w, 320px) - var(--det-w)) / 2);
+    max-width: calc(100vw - var(--lista-w, 320px) - var(--det-w) - 40px);
+  }
+}
+
+/* ---------- abaixo de 760 px: faixa de ponta a ponta, cartões rolam na horizontal ---------- */
+@media (max-width: 760px) {
+  .painel.painel-uso {
+    left: calc(var(--lista-w, 0px) + 12px);
+    right: 12px;
+    transform: none;
+    width: auto;
+    max-width: none;
+  }
+  .painel-uso-trilho { flex: 1; }
+  .painel-uso-nome { max-width: 96px; }
+}
+
+/* ---------- alvo de toque (≤ 800 px): o chevron clica em 44×44 sem mudar a faixa ----------
+   Margem negativa devolve ao layout o tamanho visual (22 px aberta, 20 px recolhida); a
+   área cresce para a esquerda e para fora em cima/embaixo, sem passar da borda direita. */
+@media (max-width: 800px) {
+  .painel-uso-recolher { width: 44px; height: 44px; margin: -11px -4px -11px -18px; }
+  .painel-uso.recolhido .painel-uso-recolher { width: 44px; height: 44px; margin: -12px -2px -12px -22px; }
+  /* "?" do Como ativar: círculo de 16 px — área de 44 px sem mexer na linha (borda transparente). */
+  .painel-uso-cartao.chip .painel-uso-como { box-sizing: content-box; border-width: 14px; border-color: transparent; margin: -14px; box-shadow: inset 0 0 0 1px var(--ia-linha); background-clip: padding-box; }
+}
+
+/* ---------- movimento reduzido: tudo instantâneo ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .painel.painel-uso,
+  .painel-uso-cartao,
+  .painel-uso-medida-preench,
+  .painel-uso-seta,
+  .painel-uso-como,
+  .painel-uso-recolher,
+  .painel-uso-recolher svg { transition: none; }
+}

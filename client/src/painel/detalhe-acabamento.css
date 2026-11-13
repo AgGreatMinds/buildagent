@@ -1,0 +1,1018 @@
+/* Acabamento visual da gaveta de detalhe do agente.
+
+ * Passos 1-3: tokens (2.1), estado do agente (data-status), casca 2.2 (barra
+ * fixa + corpo rolável + miolo), hero 2.3 e estado 2.4.
+ *
+ * Regra do spec: todo seletor real começa com `.painel-detalhe` — identidade.css
+ * carrega depois e venceria seletores de mesma especificidade (mesma regra do
+ * painel.css). Sem valor de cor novo: tudo de tokens --ia-… e --status-… (só
+ * rgba em box-shadow e o fio de assinatura, herdados de identidade.css:60-73).
+ * `color-mix` onde a spec manda; sem blur de fundo (custo de quadro). */
+
+/* (1) Tokens da spec 2.1 — 10 vars. Fonte única de valores visuais do acabamento;
+ *     nenhum componente usa valor hardcoded fora daqui. */
+.painel-detalhe {
+  --det-linha: var(--ia-linha);                                          /* 1px */
+  --det-linha-forte: color-mix(in srgb, var(--ia-papel) 16%, transparent);
+  --det-fundo: var(--ia-superficie);                                     /* cartões */
+  --det-fundo-2: var(--ia-superficie-2);                                 /* hover */
+  --det-texto: var(--ia-papel);
+  --det-texto-2: var(--painel-texto-suave);
+  --det-rot: var(--ia-apoio);                                            /* rótulos 11px */
+  --det-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --det-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --det-st: var(--status-idle);                                          /* cor do estado, trocada abaixo */
+}
+
+/* (2) Estado do agente — 7 regras que trocam `--det-st` por status. 6 filhos
+ *     (linhas de subagente, avatares, selo) + 1 na própria raiz (recebida por
+ *     pintar() no passo 3). */
+.painel-detalhe [data-status="working"] { --det-st: var(--status-working); }
+.painel-detalhe [data-status="waiting"] { --det-st: var(--status-waiting); }
+.painel-detalhe [data-status="shell"]   { --det-st: var(--status-shell); }
+.painel-detalhe [data-status="idle"]    { --det-st: var(--status-idle); }
+.painel-detalhe [data-status="done"]    { --det-st: var(--status-done); }
+.painel-detalhe [data-status="offline"] { --det-st: var(--status-offline); }
+.painel-detalhe[data-status="working"] { --det-st: var(--status-working); }
+
+/* (3) Pulso do ponto do selo de estado (spec 2.4: só em `working`). */
+@keyframes det-pulso {
+  50% { opacity: 0.3; }
+}
+
+/* (4) 2.2 — casca: gaveta sólida sobre o 3D (sem backdrop), assinatura de 2 px
+ *     (mesmo fio de identidade.css:60-73: laranja 28 px + cobalto) e sombreamento
+ *     para fora. Aberta: desliza em 240 ms `--det-ease`; fechada: `visibility`
+ *     atrasa 240 ms para a gaveta sumir do tab-order só depois de fora da tela
+ *     (resolve D10 — fechada não recebe foco). */
+.painel-detalhe {
+  background: var(--ia-tinta);
+  border-left: 1px solid var(--det-linha);
+  box-shadow: -24px 0 48px -12px rgba(0, 0, 0, 0.45);
+  transition: transform 240ms var(--det-ease), visibility 0s linear 240ms;
+}
+.painel-detalhe:not(.fechada) {
+  transition: transform 240ms var(--det-ease);
+}
+.painel-detalhe.fechada {
+  transform: translateX(105%);
+  visibility: hidden;
+}
+.painel-detalhe::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ia-laranja) 0 28px, var(--ia-cobalto) 28px 100%);
+  opacity: 0.9;
+  pointer-events: none;
+  border-radius: inherit;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  z-index: 2;
+}
+
+/* Barra fixa: 48 px, fundo sólido da gaveta, divisor fino; h2 Space Grotesk 700
+ * 13 px (a voz de display, nunca 400/600). Sombra de rolagem só quando o corpo
+ * está abaixo do topo (classe `.is-rolado` vira no listener `scroll` do corpo). */
+.painel-detalhe .painel-det-barra {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--det-linha);
+  background: var(--ia-tinta);
+  transition: box-shadow 150ms var(--det-ease);
+}
+.painel-detalhe .painel-det-barra.is-rolado {
+  box-shadow: 0 8px 12px -10px rgba(0, 0, 0, 0.7);
+}
+.painel-detalhe .painel-det-barra-titulo {
+  margin: 0;
+  font: 700 13px var(--ia-display);
+  letter-spacing: 0.02em;
+  color: var(--det-texto-2);
+}
+/* O ✕ herda a base .painel-botoes (28×28); refina borda/glifo no escopo do spec. */
+.painel-detalhe .painel-det-fechar {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--det-linha);
+  border-radius: 8px;
+  font-size: 13px;
+  background: transparent;
+  color: var(--det-texto-2);
+}
+.painel-detalhe .painel-det-fechar:hover {
+  background: var(--det-fundo-2);
+  color: var(--det-texto);
+}
+
+/* Corpo: rola no vertical, nunca no horizontal (spec 3); scrollbar fina e
+ * `gutter:stable` para a rolagem não sacudir o miolo. */
+.painel-detalhe .painel-det-corpo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ia-papel) 18%, transparent) transparent;
+  scrollbar-gutter: stable;
+}
+
+/* Miolo: grid de uma coluna, ritmo vertical de 20 px (espaço de seção do spec). */
+.painel-detalhe .painel-det-miolo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 20px;
+  padding: 16px 16px 28px;
+}
+
+/* (5) 2.3 — Hero: avatar 64 px (4 px por célula do rosto 16×16) com o rosto SVG (slot) + nome/papel/sala +
+ *     selos de provedor·conta. Toda medida do spec 2.3, fonte dos tokens. */
+.painel-detalhe .painel-det-hero {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  column-gap: 14px;
+  row-gap: 12px;
+  align-items: start;
+}
+.painel-detalhe .painel-det-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--det-st) 70%, transparent);
+  background: color-mix(in srgb, var(--det-st) 12%, var(--ia-superficie-2));
+  color: color-mix(in srgb, var(--det-st) 65%, var(--ia-papel));
+  font: 700 24px/1 var(--ia-display);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.painel-detalhe .painel-det-avatar svg {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  image-rendering: pixelated;
+}
+/* Avatar do agente sumido: especificação 3 (tabela de estados). */
+.painel-detalhe[data-status="offline"] .painel-det-avatar {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+.painel-detalhe .painel-det-id {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  align-content: center;
+}
+.painel-detalhe .painel-det-nome {
+  margin: 0;
+  font: 700 20px/1.2 var(--ia-display);
+  letter-spacing: -0.015em;
+  color: var(--det-texto);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.painel-detalhe .painel-det-papel {
+  margin: 0;
+  font: 400 13px/1.35 var(--ia-corpo);
+  color: var(--det-texto-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Sala: quadradinho de estado à esquerda, cor do estado do agente (--det-st),
+ * não cobalto fixo — a sala acompanha o estado (decisão do spec 2.3). */
+.painel-detalhe .painel-det-sala {
+  margin: 6px 0 0;
+  font: 500 12px/1.3 var(--ia-corpo);
+  color: var(--det-st);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.painel-detalhe .painel-det-sala::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: currentColor;
+  margin-right: 8px;
+  transform: translateY(-1px);
+}
+.painel-detalhe .painel-det-titulo {
+  grid-column: 1 / -1;
+  margin: 0;
+  font: 400 12.5px/1.4 var(--ia-corpo);
+  color: var(--det-texto-2);
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.painel-detalhe .painel-det-selos {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+/* Selo: chip fino com borda; conta tem ponto de cor (`--det-conta` definido
+ * por `style.setProperty` quando `color` é válido — senão cai em apoio). */
+.painel-detalhe .painel-det-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--det-linha);
+  border-radius: 6px;
+  font: 500 11px/1 var(--ia-display);
+  letter-spacing: 0.02em;
+  color: var(--det-texto-2);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.painel-detalhe .painel-det-selo-ponto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--det-conta, var(--ia-apoio));
+  flex: none;
+}
+
+/* (6) 2.4 — Estado + ações: selo de status com ponto (pulsa só em `working`),
+ *     tempo no status (mono, repintura passa a lê-lo pelo `data-epoch` no
+ *     passo 7) e botões Seguir/Centralizar (só existem no DOM se `opcoes`
+ *     foram passadas — ver detalhe.ts / detalhe-pecas.ts). */
+.painel-detalhe .painel-det-estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+.painel-detalhe .painel-det-estado-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid color-mix(in srgb, var(--det-st) 40%, transparent);
+  background: color-mix(in srgb, var(--det-st) 14%, transparent);
+  color: color-mix(in srgb, var(--det-st) 65%, var(--ia-papel));
+  font: 700 11px/1 var(--ia-display);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.painel-detalhe .painel-det-estado-selo::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+/* Pulso: o ponto respira só quando o agente está trabalhando — estado real,
+ * nunca decoração de loop (especificação 2.4). */
+.painel-detalhe .painel-det-estado-selo[data-status="working"]::before {
+  animation: det-pulso 1.6s ease-in-out infinite;
+}
+.painel-detalhe .painel-det-estado-tempo {
+  font: 400 11px/1 var(--det-mono);
+  color: var(--det-rot);
+}
+.painel-detalhe .painel-det-estado-acoes {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+/* Botões da gaveta: fino, transparente, feedback em hover/active/focus;
+ * `aria-pressed` (Seguir) fica em laranja — a ação quente dentro do frio. */
+.painel-detalhe .painel-det-btn {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--det-linha);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--det-texto-2);
+  font: 500 12.5px/1 var(--ia-corpo);
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms, color 120ms;
+}
+.painel-detalhe .painel-det-btn:hover {
+  background: var(--det-fundo-2);
+  color: var(--det-texto);
+  border-color: var(--det-linha-forte);
+}
+.painel-detalhe .painel-det-btn:active {
+  transform: scale(0.98);
+}
+.painel-detalhe .painel-det-btn:focus-visible {
+  outline: 2px solid var(--ia-cobalto);
+  outline-offset: 2px;
+}
+.painel-detalhe .painel-det-btn[aria-pressed="true"] {
+  border-color: var(--ia-laranja);
+  background: color-mix(in srgb, var(--ia-laranja) 14%, transparent);
+  color: var(--ia-laranja-alto);
+}
+.painel-detalhe .painel-det-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+/* Aviso do agente sumido: tracejado, discreto, sem cor de erro. */
+.painel-detalhe .painel-det-aviso {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--det-linha-forte);
+  border-radius: 10px;
+  font: 400 12.5px/1.4 var(--ia-corpo);
+  color: var(--det-texto-2);
+}
+
+/* (8) 2.5 — Card "Agora": cartão com sombra interna de estado (2 px `--det-st`),
+ *     linha principal opcional com ícone de 28 px (a cor do ícone por grupo do
+ *     spec 2.8 só entra no passo 6 — por enquanto a cor é herdada; o
+ *     `data-grupo` já está no DOM da peça `cartaoAgora`). */
+.painel-detalhe .painel-det-agora {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* trilho limitado à largura do cartão: texto longo trunca, não empurra a borda direita */
+  min-width: 0;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--det-linha);
+  border-radius: 12px;
+  background: var(--det-fundo);
+  box-shadow: inset 2px 0 0 var(--det-st);
+}
+.painel-detalhe .painel-det-agora-rot {
+  margin: 0;
+  font: 500 11px/1 var(--ia-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--det-rot);
+}
+/* Linha com ícone (tipo `acao` com ação): ícone 28 px + texto em 2 linhas. */
+.painel-detalhe .painel-det-agora-linha {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+.painel-detalhe .painel-det-agora .painel-det-ico {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  line-height: 1;
+}
+.painel-detalhe .painel-det-agora-texto {
+  margin: 0;
+  font: 500 14px/1.35 var(--ia-corpo);
+  color: var(--det-texto);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+/* Meta ("há 2 m", última ação, shells): 1 linha com reticências. */
+.painel-detalhe .painel-det-agora-meta {
+  margin: 0;
+  font: 400 12px/1.35 var(--ia-corpo);
+  color: var(--det-rot);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* (9) 2.6 — Grade "Identificação": `dl` em cartão, linhas de 32 px
+ * (84 px de rótulo + valor truncado), botão de copiar revelado no hover da
+ * linha. `display:block` no valor é a correção do diagnóstico D2 (inline não
+ * trunca). As regras de seção recolhível `.painel-det-sec*` (spec 2.7)
+ * entram no passo 5 — até lá o corpo usa a classe da Frente C. */
+.painel-detalhe .painel-det-grade {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border: 1px solid var(--det-linha);
+  border-radius: 10px;
+  background: var(--det-fundo);
+  overflow: hidden;
+}
+.painel-detalhe .painel-det-grade-linha {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  min-height: 32px;
+  padding: 4px 6px 4px 12px;
+}
+.painel-detalhe .painel-det-grade-linha + .painel-det-grade-linha {
+  border-top: 1px solid var(--det-linha);
+}
+.painel-detalhe .painel-det-grade dt {
+  font: 500 11px/1.2 var(--ia-corpo);
+  color: var(--det-rot);
+}
+.painel-detalhe .painel-det-grade dd {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+/* Valor: `display:block` (corrige D2 — inline não trunca), 1 linha com
+ * reticências; `--mono` troca para a fonte mono; `--vazio` cai na cor de
+ * rótulo ("Não informado"). */
+.painel-detalhe .painel-det-valor {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  font: 400 13px/1.35 var(--ia-corpo);
+  color: var(--det-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.painel-detalhe .painel-det-valor-mono {
+  font: 400 12px/1.35 var(--det-mono);
+}
+.painel-detalhe .painel-det-valor-vazio {
+  color: var(--det-rot);
+}
+/* Botão de copiar: 24×24, invisível por padrão; revelado no hover da linha,
+ * no focus próprio e no estado `.is-ok` (copiado, 1400 ms). Em tela sem
+ * hover ele fica sempre visível. */
+.painel-detalhe .painel-det-copiar {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--det-rot);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms var(--det-ease);
+}
+.painel-detalhe .painel-det-grade-linha:hover .painel-det-copiar,
+.painel-detalhe .painel-det-copiar:focus-visible,
+.painel-detalhe .painel-det-copiar.is-ok {
+  opacity: 1;
+}
+.painel-detalhe .painel-det-copiar:hover {
+  background: var(--det-fundo-2);
+}
+.painel-detalhe .painel-det-copiar:focus-visible {
+  outline: 2px solid var(--ia-cobalto);
+  outline-offset: 2px;
+}
+.painel-detalhe .painel-det-copiar.is-ok {
+  color: var(--det-texto-2);
+}
+@media (hover: none) {
+  .painel-detalhe .painel-det-copiar {
+    opacity: 1;
+  }
+}
+
+/* (10) 2.7 — Seções recolhíveis: cabeçalho-botão (32 px) com título em Space
+ * Grotesk 700, chip de contador opcional e chevron desenhado em CSS (borda
+ * direito/inferior 1.5 px, gira 45° entre aberta/fechada). O corpo recebe
+ * `hidden` quando fechado — o estado é do closure (Set em detalhe.ts), não do
+ * DOM; `data-sec` é o id da seção (identificação, subagentes, responsavel,
+ * linhaDoTempo, estatisticas, vidasocial, extrato). */
+.painel-detalhe .painel-det-sec {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--det-linha);
+  padding-top: 12px;
+  min-width: 0;
+}
+.painel-detalhe .painel-det-sec-cab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--det-texto);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+.painel-detalhe .painel-det-sec-cab:hover {
+  color: var(--det-texto);
+}
+.painel-detalhe .painel-det-sec-titulo {
+  flex: 1;
+  min-width: 0;
+  font: 700 13px/1 var(--ia-display);
+  letter-spacing: 0.01em;
+  color: var(--det-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Contador (nº de subagentes / ações): chip fino mono à direita do título. */
+.painel-detalhe .painel-det-chip {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--ia-papel) 8%, transparent);
+  font: 500 11px/20px var(--det-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--det-texto-2);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+/* Chevron: `i` vazio com ::before de 7×7 (borda direita + inferior), cor
+ * rotulado por padrão; o hover do cabeçalho o ilumina; a rotação (45° aberta
+ * / -45° fechada) vem do `aria-expanded` do botão-pai. */
+.painel-detalhe .painel-det-chevron {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+.painel-detalhe .painel-det-chevron::before {
+  content: "";
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  color: var(--det-rot);
+  transform: rotate(45deg);
+  transition: transform 150ms var(--det-ease);
+}
+.painel-detalhe .painel-det-sec-cab:hover .painel-det-chevron {
+  color: var(--det-texto-2);
+}
+.painel-detalhe .painel-det-sec-cab[aria-expanded="false"] .painel-det-chevron::before {
+  transform: rotate(-45deg);
+}
+.painel-detalhe .painel-det-sec-cab:focus-visible {
+  outline: 2px solid var(--ia-cobalto);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Corpo: sem layout próprio (o conteúdo traz o dele — grade, lista, refino
+ * das seções da Frente C); `min-width:0` para os filhos truncarem sem estourar
+ * a gaveta. `[hidden]` precisa de regra explícita: a regra base não declara
+ * `display`, mas o `[hidden]` nativo some do tab-order/fluxo quando o corpo
+ * está fechado. */
+.painel-detalhe .painel-det-sec-corpo {
+  min-width: 0;
+}
+.painel-detalhe .painel-det-sec-corpo[hidden] {
+  display: none;
+}
+/* Espaçamento entre a lista de cartões e o botão "Mostrar mais/menos". */
+.painel-detalhe .painel-det-lista + .painel-det-mais {
+  margin-top: 6px;
+}
+
+/* (11) 2.8 — Subagentes / Responsável: lista de cartões (48 px) com avatar de
+ * inicial colorido pelo estado do subagente, nome/papel e selo de status;
+ * botão "Mostrar mais N" tracejado. `data-status` no `li` não existe — a cor
+ * do estado vem do `button[data-status]` (escopo do bloco 2). */
+.painel-detalhe .painel-det-lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+.painel-detalhe .painel-det-sub {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid var(--det-linha);
+  border-radius: 10px;
+  background: var(--det-fundo);
+  color: var(--det-texto);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms;
+}
+.painel-detalhe .painel-det-sub:hover {
+  background: var(--det-fundo-2);
+  border-color: var(--det-linha-forte);
+}
+.painel-detalhe .painel-det-sub:focus-visible {
+  outline: 2px solid var(--ia-cobalto);
+  outline-offset: 2px;
+}
+.painel-detalhe .painel-det-sub-av {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--det-st) 55%, transparent);
+  background: color-mix(in srgb, var(--det-st) 12%, transparent);
+  font: 700 13px/1 var(--ia-display);
+  color: color-mix(in srgb, var(--det-st) 65%, var(--ia-papel));
+  display: grid;
+  place-items: center;
+}
+.painel-detalhe .painel-det-sub-txt {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.painel-detalhe .painel-det-sub-nome {
+  font: 700 13px/1.25 var(--ia-display);
+  color: var(--det-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.painel-detalhe .painel-det-sub-papel {
+  font: 400 12px/1.25 var(--ia-corpo);
+  color: var(--det-rot);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.painel-detalhe .painel-det-sub-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 11px/1 var(--ia-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--det-st) 65%, var(--ia-papel));
+  white-space: nowrap;
+}
+.painel-detalhe .painel-det-sub-estado::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+/* Estado vazio da hierarquia (sem subagentes / pai sumido): nota tracejada. */
+.painel-detalhe .painel-det-vazio {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px dashed var(--det-linha-forte);
+  border-radius: 10px;
+  color: var(--det-rot);
+  font: 400 12.5px/1.4 var(--ia-corpo);
+}
+/* Botão "Mostrar mais N / Mostrar menos" (specs 2.8/2.9): tracejado, inteiro
+ * na largura do corpo; feedback de fundo no hover. */
+.painel-detalhe .painel-det-mais {
+  width: 100%;
+  height: 32px;
+  border: 1px dashed var(--det-linha-forte);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--det-texto-2);
+  font: 500 12.5px/1 var(--ia-corpo);
+  cursor: pointer;
+  transition: background 120ms var(--det-ease);
+}
+.painel-detalhe .painel-det-mais:hover {
+  background: var(--det-fundo-2);
+}
+.painel-detalhe .painel-det-mais:focus-visible {
+  outline: 2px solid var(--ia-cobalto);
+  outline-offset: 2px;
+}
+
+/* (12) 2.9 — Linha do tempo: cartão de ação (44 px) com ícone colorido por
+ * grupo (`--det-cor` por `data-grupo` — tabela de cores da spec), texto em
+ * 1 linha e tempo mono tabular à direita. Erro: borda/texto em `--uso-crit`. */
+.painel-detalhe .painel-det-acao {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--det-linha);
+  border-radius: 10px;
+  background: var(--det-fundo);
+  transition: background 120ms, border-color 120ms;
+  --det-cor: var(--ia-apoio);
+}
+.painel-detalhe .painel-det-acao:hover {
+  background: var(--det-fundo-2);
+  border-color: var(--det-linha-forte);
+}
+/* Cor do ícone por grupo de ação (`grupoDaAcao`, spec 2.9). `ler`/`rodar`
+ * usam os tokens de identidade; `pensar`/`outro` caem em apoio; estados de
+ * alerta/conclusão/erro trazem cor própria. O `data-grupo` vem do cartão
+ * (e do card "Agora" — que herda a mesma `.painel-det-ico`). */
+.painel-detalhe .painel-det-ico[data-grupo="ler"] { --det-cor: var(--ia-cobalto); }
+.painel-detalhe .painel-det-ico[data-grupo="escrever"] { --det-cor: var(--ia-laranja); }
+.painel-detalhe .painel-det-ico[data-grupo="rodar"] { --det-cor: var(--ia-papel); }
+.painel-detalhe .painel-det-ico[data-grupo="pensar"] { --det-cor: var(--ia-apoio); }
+.painel-detalhe .painel-det-ico[data-grupo="atencao"] { --det-cor: var(--status-waiting); }
+.painel-detalhe .painel-det-ico[data-grupo="fim"] { --det-cor: var(--status-done); }
+.painel-detalhe .painel-det-ico[data-grupo="erro"] { --det-cor: var(--uso-crit); }
+.painel-detalhe .painel-det-ico[data-grupo="outro"] { --det-cor: var(--ia-apoio); }
+.painel-detalhe .painel-det-acao .painel-det-ico {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  line-height: 1;
+  background: color-mix(in srgb, var(--det-cor) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--det-cor) 32%, transparent);
+  color: color-mix(in srgb, var(--det-cor) 70%, var(--ia-papel));
+}
+.painel-detalhe .painel-det-acao-texto {
+  font: 400 13px/1.3 var(--ia-corpo);
+  color: var(--det-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Tempo mono tabular à direita: vazio em "há X"/"agora" (a repintura do
+ * passo 7 reescreve por `data-epoch` + `data-modo="ha"`). */
+.painel-detalhe .painel-det-acao-tempo {
+  font: 400 11px/1 var(--det-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--det-rot);
+  white-space: nowrap;
+}
+/* Erro (Activity.error): borda crítica e ícone/texto em `--uso-crit`. */
+.painel-detalhe .painel-det-acao.is-erro {
+  border-color: color-mix(in srgb, var(--uso-crit) 45%, transparent);
+}
+.painel-detalhe .painel-det-acao.is-erro .painel-det-ico {
+  --det-cor: var(--uso-crit);
+}
+.painel-detalhe .painel-det-acao.is-erro .painel-det-acao-texto {
+  color: color-mix(in srgb, var(--uso-crit) 70%, var(--ia-papel));
+}
+
+/* (13) 2.10 — Estatísticas: 4 tiles em grade de 2 colunas (valor 700 grande
+ * acima do rótulo 11 px — nunca colados; `min-width:0` + reticências no
+ * rótulo) + grade `dl` reusada da spec 2.6. */
+.painel-detalhe .painel-det-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.painel-detalhe .painel-det-tile {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--det-linha);
+  border-radius: 10px;
+  background: var(--det-fundo);
+}
+.painel-detalhe .painel-det-tile-valor {
+  font: 700 20px/1.15 var(--ia-display);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--det-texto);
+}
+.painel-detalhe .painel-det-tile-rot {
+  font: 500 11px/1.2 var(--ia-corpo);
+  color: var(--det-rot);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* (13) 2.11 — Vida social: selo "simulado" no cabeçalho, traços em chip,
+ * bordão com filete cobalto, rivais reutilizando o cartão de subagente,
+ * moedinhas em laranja, extrato como sub-seção e nota final. O corpo
+ * (`.painel-vidsocial`) assume o ritmo vertical de 12 px da spec. */
+.painel-detalhe .painel-vidsocial {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+/* Selo "simulado": chip fino ao lado do título (spec 2.11: 18 px de altura). */
+.painel-detalhe .painel-det-sim {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border: 1px solid var(--det-linha);
+  border-radius: 5px;
+  font: 500 10.5px/18px var(--ia-display);
+  letter-spacing: 0.04em;
+  color: var(--det-rot);
+  flex: none;
+}
+/* Traços: até 2 chips (emoji + rótulo), flex wrap. */
+.painel-detalhe .painel-det-tracos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.painel-detalhe .painel-det-traco {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--det-linha);
+  border-radius: 8px;
+  background: var(--det-fundo);
+  font: 500 12.5px/1 var(--ia-corpo);
+  color: var(--det-texto);
+}
+.painel-detalhe .painel-det-traco-emoji {
+  font-size: 13px;
+}
+/* Bordão: blockquote com filete cobalto à esquerda; o texto quebra em
+ * qualquer lugar (frases longas não estouram a gaveta). */
+.painel-detalhe .painel-det-bordao {
+  margin: 0;
+  padding: 2px 0 2px 12px;
+  border-left: 2px solid var(--ia-cobalto);
+  font: 400 13px/1.45 var(--ia-corpo);
+  color: var(--det-texto-2);
+  overflow-wrap: anywhere;
+}
+/* Moedinhas: valor laranja (a ação quente da brincadeira) + rótulo; baseline
+ * para o número grande e o rótulo alinharem no mesmo fio. */
+.painel-detalhe .painel-det-moedas {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.painel-detalhe .painel-det-moedas-valor {
+  font: 700 20px/1 var(--ia-display);
+  color: var(--ia-laranja-alto);
+  font-variant-numeric: tabular-nums;
+}
+.painel-detalhe .painel-det-moedas-rot {
+  font: 400 12px/1 var(--ia-corpo);
+  color: var(--det-rot);
+}
+/* Extrato (sub-seção dentro da Vida social): sem a borda superior da seção
+ * normal; linhas texto + hora mono, 1 linha cada, divisor fino. */
+.painel-detalhe .painel-det-sec-sub {
+  border-top: 0;
+  padding-top: 0;
+}
+.painel-detalhe .painel-det-extrato-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  border-bottom: 1px solid var(--det-linha);
+  min-width: 0;
+}
+.painel-detalhe .painel-det-extrato-linha:last-child {
+  border-bottom: 0;
+}
+.painel-detalhe .painel-det-extrato-icone {
+  flex: none;
+  font-size: 12px;
+}
+.painel-detalhe .painel-det-extrato-texto {
+  flex: 1;
+  min-width: 0;
+  font: 400 12.5px/1.3 var(--ia-corpo);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.painel-detalhe .painel-det-extrato-hora {
+  flex: none;
+  font: 400 12px/1 var(--det-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--det-rot);
+  white-space: nowrap;
+}
+/* Nota final da brincadeira: letra pequena de rótulo, sem destaque. */
+.painel-detalhe .painel-det-notas {
+  margin: 0;
+  font: 400 11px/1.4 var(--ia-corpo);
+  color: var(--det-rot);
+}
+
+/* (7) Mobile (spec 3, passo 9): a gaveta mantém a casca `var(--det-w)`
+ *     (92vw, máx 400 — painel.css); aqui só as medidas de toque/alvo do
+ *     bloco mobile da spec: barra 52 px, miolo mais justo, avatar/hero
+ *     menores, nome 18 px, botões de estado em largura cheia, cartões de
+ *     subagente/ação 48 px, copiar sempre visível (as alturas de toque —
+ *     ✕, botões, seções, copiar, "mostrar mais" — ficam no bloco ≤ 800 px
+ *     abaixo, com 44 px). Tiles seguem 2×2
+ *     (decisão da spec: "tiles continuam 2×2" — o bloco antigo de 1 coluna
+ *     era do refino da Frente C e saiu). */
+@media (max-width: 760px) {
+  .painel-detalhe .painel-det-barra {
+    height: 52px;
+  }
+  .painel-detalhe .painel-det-miolo {
+    padding: 14px 14px 32px;
+    row-gap: 18px;
+  }
+  .painel-detalhe .painel-det-hero {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  .painel-detalhe .painel-det-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 20px;
+  }
+  .painel-detalhe .painel-det-nome {
+    font-size: 18px;
+  }
+  /* Botões Seguir/Centralizar: fim da linha, em largura cheia, alvo de toque. */
+  .painel-detalhe .painel-det-estado-acoes {
+    margin-left: 0;
+    width: 100%;
+  }
+  .painel-detalhe .painel-det-btn {
+    flex: 1;
+  }
+  .painel-detalhe .painel-det-sub {
+    min-height: 48px;
+  }
+  .painel-detalhe .painel-det-acao {
+    min-height: 48px;
+  }
+  /* Copiar: sempre visível em tela estreita (sem depender de hover). */
+  .painel-detalhe .painel-det-copiar {
+    opacity: 1;
+  }
+}
+
+/* Alvos de toque (≤ 800 px): ✕, botões de estado, cabeçalhos de seção, copiar e
+ * "mostrar mais" com ≥ 44 px. O copiar cresce só na área clicável — margem negativa
+ * devolve 32 px ao layout, a linha da grade não engorda. */
+@media (max-width: 800px) {
+  .painel-detalhe .painel-det-fechar {
+    width: 44px;
+    height: 44px;
+  }
+  .painel-detalhe .painel-det-btn,
+  .painel-detalhe .painel-det-sec-cab,
+  .painel-detalhe .painel-det-mais {
+    height: 44px;
+  }
+  .painel-detalhe .painel-det-copiar {
+    width: 44px;
+    height: 44px;
+    margin: -6px 0 -6px -12px; /* cresce para a esquerda: não passa da borda do valor */
+  }
+}
+
+/* Reduced motion (spec 3, passo 9): abrir/fechar vira troca imediata
+ * (`transition:none` mata o deslizar e o atraso do `visibility`), barra,
+ * chevron, botões e cartões perdem transição; o pulso do selo some.
+ * O conteúdo e os estados continuam intactos. */
+@media (prefers-reduced-motion: reduce) {
+  .painel-detalhe {
+    transition: none;
+  }
+  .painel-detalhe .painel-det-barra,
+  .painel-detalhe .painel-det-chevron::before,
+  .painel-detalhe .painel-det-btn,
+  .painel-detalhe .painel-det-sub,
+  .painel-detalhe .painel-det-acao,
+  .painel-detalhe .painel-det-mais,
+  .painel-detalhe .painel-det-copiar {
+    transition: none;
+  }
+  .painel-detalhe .painel-det-estado-selo[data-status="working"]::before {
+    animation: none;
+  }
+}

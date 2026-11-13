@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BuildAgent</title>
+  <!-- PWA: app instalável. Sem service worker nesta fase. -->
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#0b0f14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BuildAgent" />
+  <link rel="apple-touch-icon" href="/icons/icon.svg" />
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #100e0d; font-family: 'General Sans', -apple-system, system-ui, sans-serif; }
+    canvas { display: block; }
+    #hud { position: fixed; left: calc(var(--lista-w, 320px) + 16px); bottom: 34px; color: #e8edf2; font-size: 12px; letter-spacing: .02em; pointer-events: none; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+    #hud b { font-size: 12px; }
+    #hud .dim { opacity: .65; }
+    #keys { position: fixed; left: calc(var(--lista-w, 320px) + 16px); bottom: 14px; color: #e8edf2; opacity: .6; font-size: 11.5px; text-shadow: 0 1px 6px rgba(0,0,0,.6); pointer-events: none; }
+    /* Rodapé invertido: o estado (#hud, 1 linha) fica embaixo e os atalhos (#keys) em cima, ancorados pelo
+       bottom — se os atalhos quebram linha crescem PARA CIMA, nunca por cima do #hud (antes eram cortados com "…"). */
+    #hud { bottom: 14px; right: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #keys { bottom: 34px; right: 16px; line-height: 15px; }
+    /* Atalhos são de teclado/mouse: some em toque e celular; o #hud desvia da coluna da direita (feed, "?", avisos) e pode quebrar. */
+    @media (max-width: 760px), (hover: none) { #keys { display: none; } }
+    @media (max-width: 760px) { #hud { right: 70px; white-space: normal; line-height: 16px; } }
+    /* Atividade e replay abertos ocupam o rodapé: os atalhos saem em vez de ficarem cobertos pela metade. */
+    body:has(.painel-feed:not(.fechada)) #keys, body:has(.painel-feed:not(.fechada)) #hud,
+    body:has(.painel-replay:not([hidden])) #keys { visibility: hidden; }
+    /* Elevador: andares empilhados na vertical à direita, o mais alto em cima. */
+    #andares { position: fixed; right: 16px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; pointer-events: none; z-index: 12; }
+    #andares button {
+      pointer-events: auto; cursor: pointer; color: #9aa5b1; font: 500 12.5px/1 'Space Grotesk', system-ui, sans-serif; letter-spacing: .02em;
+      min-width: 92px; padding: 9px 12px; text-align: left; border: 1px solid rgba(255,255,255,.08); border-radius: 10px;
+      background: rgba(14,17,23,.94); box-shadow: 0 10px 30px rgba(0,0,0,.38); transition: background .12s, color .12s;
+    }
+    #andares button:hover { background: rgba(32,37,46,.98); color: #e8ecf1; }
+    #andares button.ativo { background: #5ad1d6; border-color: #5ad1d6; color: #06161a; font-weight: 600; }
+    #andares [data-foco="2"] { order: 1; } #andares [data-foco="1"] { order: 2; } #andares [data-foco="0"] { order: 3; }
+    #andares [data-foco="todos"] { order: 4; } #andares #vista-cima { order: 5; margin-top: 8px; }
+    /* Nunca sobe por cima da faixa de contas em janela baixa: o centro desce até caber abaixo de
+       barra (--barra-h, medida em barra.ts) + faixa (51 px) + folga + metade do elevador (106 px). */
+    #andares { top: max(50%, calc(12px + var(--barra-h, 52px) + 6px + 51px + 12px + 106px)); }
+    /* Alvo de toque (≤ 800 px): botões do elevador com 44 px de altura (metade do elevador = 126 px). */
+    @media (max-width: 800px) { #andares button { min-height: 44px; } #andares { top: max(50%, calc(12px + var(--barra-h, 52px) + 6px + 51px + 12px + 126px)); } }
+  </style>
+</head>
+<body>
+  <div id="hud"><b>BuildAgent</b> <span class="dim" id="estado">conectando…</span></div>
+  <div id="andares">
+    <button data-foco="todos" class="ativo">Tudo</button>
+    <button data-foco="0">Térreo</button>
+    <button data-foco="1">Andar 1</button>
+    <button data-foco="2">Andar 2</button>
+    <button id="vista-cima">Vista de cima</button>
+  </div>
+  <div id="keys">1 visão geral · 2 entrada · 3 andar 1 · arraste para girar · roda para aproximar · ↑↓ sobem e descem de andar</div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
