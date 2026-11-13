@@ -6,6 +6,8 @@ pede a sua atenção quando precisa de você e vai embora quando termina.
 
 [English](README.en.md) · [Arquitetura](docs/ARQUITETURA.md) · [Como contribuir](CONTRIBUTING.md) · [Segurança](SECURITY.md)
 
+https://github.com/user-attachments/assets/e40f6f36-7f75-4eea-8f9f-f6cdb1f28b4a
+
 ![O prédio visto de fora](docs/img/predio.png)
 ![Andar de trabalho: uma fileira de mesas por projeto](docs/img/andar.png)
 
@@ -26,7 +28,7 @@ pede a sua atenção quando precisa de você e vai embora quando termina.
 </tr>
 </table>
 
-Todas as imagens são do modo demonstração (agentes fictícios).
+As imagens e o vídeo são do modo demonstração (agentes fictícios).
 
 ## O que ele lê
 

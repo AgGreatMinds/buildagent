@@ -6,6 +6,8 @@ works, asks for your attention when it needs you, and leaves when it is done.
 
 [Português](README.md) · [Architecture (pt-BR)](docs/ARQUITETURA.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
+https://github.com/user-attachments/assets/e40f6f36-7f75-4eea-8f9f-f6cdb1f28b4a
+
 ![The building from outside](docs/img/predio.png)
 ![Work floor: one row of desks per project](docs/img/andar.png)
 
@@ -26,7 +28,7 @@ works, asks for your attention when it needs you, and leaves when it is done.
 </tr>
 </table>
 
-All images come from demo mode (fictional agents).
+The images and the video come from demo mode (fictional agents).
 
 ## What it reads
 
