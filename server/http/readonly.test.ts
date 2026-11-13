@@ -60,7 +60,7 @@ describe('server (somente leitura)', () => {
     // HOME vazia: nenhuma conta nem shell alias é lido; nada toca em ~/.claude nem em dataDir.
     const env = {
       ...process.env,
-      HABBLAUD_PORT: String(port),
+      BUILDAGENT_PORT: String(port),
       HOME: mkdtempSync(join(tmpdir(), 'buildagent-test-')),
     };
     handle = start(env);

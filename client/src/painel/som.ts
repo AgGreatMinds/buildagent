@@ -5,7 +5,7 @@
 // autoplay); ganho mestre com curva perceptual, gap mínimo de 1,2 s entre
 // dois sons (sino e estalo dividem o mesmo canal). As prefs {som, volume,
 // notificacoes} são persistidas em localStorage com try/catch (corrompida → padrão).
-// Cortado do original (habblaud): sons ambientes (keys/elevator/social), buffer
+// Cortado do original: sons ambientes (keys/elevator/social), buffer
 // de ruído e o agendador multi-categoria — só os dois sons de aviso são usados.
 // Desde c6: as prefs som/volume/notificações vivem na chave unificada de
 // prefs.ts ('buildagent.prefs'); PrefsSom é projeção dela.

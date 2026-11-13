@@ -80,10 +80,10 @@ describe('GET /api/session/:id (integração)', () => {
     ]);
     const env = {
       ...process.env,
-      HABBLAUD_PORT: String(port),
+      BUILDAGENT_PORT: String(port),
       HOME: tmp,
-      HABBLAUD_DATA_DIR: join(tmp, 'data'),
-      HABBLAUD_USAGE_DIR: join(tmp, 'usage'),
+      BUILDAGENT_DATA_DIR: join(tmp, 'data'),
+      BUILDAGENT_USAGE_DIR: join(tmp, 'usage'),
     };
     handle = start(env);
     await new Promise<void>((r) => handle.server.once('listening', () => r()));

@@ -1,7 +1,7 @@
 // Adaptado de marmottajr/habblaud@faa1a01 client/src/ui/settings.ts + ui/prefs.ts (MIT)
 // Diálogo de configurações (engrenagem da barra): sons (interruptor +
 // volume), notificações do navegador, modo conteúdo/gravação, idioma PT/EN
-// (salva e recarrega, como o pickLanguage do habblaud) e mostrar/ocultar
+// (salva e recarrega, como o pickLanguage do projeto de origem) e mostrar/ocultar
 // lista/atividade/ajuda; botão "Redefinir" apaga a chave unificada e recarrega.
 // As preferências vivem em prefs.ts (chave 'buildagent.prefs'); aqui só o DOM.
 // Strings: texto.config (PT) ou textoEn.config (EN) conforme a escolha salva —
@@ -229,7 +229,7 @@ export function montarConfig(opcoes: OpcoesConfig = {}): ApiConfig {
     aoAlternarPainel?.('ajuda');
   });
 
-  // ---------- seção Idioma: segmented PT/EN (salva e recarrega, padrão do habblaud) ----------
+  // ---------- seção Idioma: segmented PT/EN (salva e recarrega, padrão do projeto de origem) ----------
   const secaoIdioma = secao(t.secoes.idioma);
   {
     const l = document.createElement('div');

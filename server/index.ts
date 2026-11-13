@@ -9,7 +9,7 @@
 // buildagent.
 // Cortado: Codex hooks (GET-only), terminal, demo, mensagens, permissões,
 // pty, spawn, entregas, porta remota e World. OpenCode entra quando config.openCode
-// (HABBLAUD_OPENCODE=0 desliga) e existe um banco (HABBLAUD_OPENCODE_DIRS ou o padrão do host).
+// (BUILDAGENT_OPENCODE=0 desliga) e existe um banco (BUILDAGENT_OPENCODE_DIRS ou o padrão do host).
 import { existsSync } from 'node:fs';
 import http from 'node:http';
 import { join, resolve } from 'node:path';
@@ -72,9 +72,9 @@ export function start(env: NodeJS.ProcessEnv = process.env): ServerHandle {
   // Ligação tardia: o Office anuncia as fontes num snapshot que só existe depois
   // do watcher; a closure lê `agents` no momento da leitura, nunca na criação.
   let agents: SourceSet;
-  // OpenBot: só o cadastro (nome e cargo por pasta de agente), somente leitura; HABBLAUD_OPENBOT=0 desliga.
+  // OpenBot: só o cadastro (nome e cargo por pasta de agente), somente leitura; BUILDAGENT_OPENBOT=0 desliga.
   // Na demonstração o cadastro real nem é aberto (nada real aparece, nem nome de agente).
-  const openBot = config.openBot && !config.demo ? new OpenBotDirectory({ dbPath: config.openBotDb, warnMissing: Boolean(env.HABBLAUD_OPENBOT_DB?.trim()) }) : undefined;
+  const openBot = config.openBot && !config.demo ? new OpenBotDirectory({ dbPath: config.openBotDb, warnMissing: Boolean(env.BUILDAGENT_OPENBOT_DB?.trim()) }) : undefined;
   const office = new Office({
     names: new NameStore(null), // em memória: nenhum arquivo escrito em dataDir
     version: config.version,
@@ -99,12 +99,12 @@ export function start(env: NodeJS.ProcessEnv = process.env): ServerHandle {
   if (codex) agents.add(codex);
 
   // OpenCode: só se o config pede e se existe pelo menos um banco (somente leitura;
-  // HABBLAUD_OPENCODE_DIRS/HABBLAUD_OPENCODE_DB apontam os caminhos, senão o padrão do host).
+  // BUILDAGENT_OPENCODE_DIRS/BUILDAGENT_OPENCODE_DB apontam os caminhos, senão o padrão do host).
   const openCodeDirs = config.openCode && !config.demo ? discoverOpenCodeDirs(env, config.home) : [];
   const openCode = openCodeDirs.length ? new OpenCodeSource({ accounts, office, dirs: openCodeDirs, env, home: config.home }) : undefined;
   if (openCode) agents.add(openCode);
 
-  // Pi: só se o config pede e a pasta de sessões existe (somente leitura; HABBLAUD_PI_DIR troca o caminho).
+  // Pi: só se o config pede e a pasta de sessões existe (somente leitura; BUILDAGENT_PI_DIR troca o caminho).
   const pi = config.pi && !config.demo && existsSync(config.piDir) ? new PiSource({ accounts, office, dir: config.piDir }) : undefined;
   if (pi) agents.add(pi);
 
@@ -169,7 +169,7 @@ export function start(env: NodeJS.ProcessEnv = process.env): ServerHandle {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('Content-Security-Policy', "frame-ancestors 'none'");
-    // Guarda mínima: só as funções puras do guarda de habblaud (hostAllowed).
+    // Guarda mínima: só as funções puras do guarda do projeto de origem (hostAllowed).
     // O filtro completo responde 403/415 — incompatível com este contrato de 405/421,
     // e de resto ele não tem o que defender: não há método de escrita.
     if (!hostAllowed(req.headers.host, config.allowedHosts)) {
@@ -226,7 +226,7 @@ export function start(env: NodeJS.ProcessEnv = process.env): ServerHandle {
   });
   server.on('error', (err) => {
     if ((err as NodeJS.ErrnoException).code === 'EADDRINUSE') {
-      log.error(tr('A porta {0} já está em uso (defina HABBLAUD_PORT para usar outra).', [config.port]));
+      log.error(tr('A porta {0} já está em uso (defina BUILDAGENT_PORT para usar outra).', [config.port]));
     } else {
       log.error(tr('Erro no servidor HTTP: {0}', [errMsg(err)]));
     }
@@ -260,7 +260,7 @@ export function start(env: NodeJS.ProcessEnv = process.env): ServerHandle {
     const fontes = ['claude', codex && 'codex', openCode && 'opencode', pi && 'pi', openBot && 'openbot (cadastro)'].filter(Boolean).join(', ');
     log.info(config.demo ? tr('Modo demonstração: agentes fictícios, nenhuma sessão real é lida.') : tr('Fontes ativas: {0}. Dados em {1}.', [fontes, dataDir]));
     // Fora do loopback, qualquer máquina da rede lê nomes de projeto e atividade: avisa quem escolheu isso.
-    if (!isLoopbackBind(config.host)) log.warn(tr('Atenção: HABBLAUD_HOST={0} expõe o painel na rede local. Use 127.0.0.1 se não for de propósito.', [config.host]));
+    if (!isLoopbackBind(config.host)) log.warn(tr('Atenção: BUILDAGENT_HOST={0} expõe o painel na rede local. Use 127.0.0.1 se não for de propósito.', [config.host]));
   });
 
   return { server, close };

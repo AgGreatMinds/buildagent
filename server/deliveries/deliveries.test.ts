@@ -12,7 +12,7 @@ import { createDeliveriesHandler, type RoomRef } from './index';
 
 const SEP = '\x1f';
 
-describe('extração de PR/push na saída (regex portados do Habblaud)', () => {
+describe('extração de PR/push na saída (regex portados do projeto de origem)', () => {
   it('pega o nº do PR em mensagens de merge', () => {
     expect(prNumberFromText('Merge pull request #12 from dev/feature')).toBe(12);
     expect(prNumberFromText('Merge #42 into main')).toBe(42);

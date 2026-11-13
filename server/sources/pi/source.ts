@@ -24,7 +24,7 @@ const MAIN_ROLE = tr('Agente principal (Pi)');
 export interface PiSourceOptions {
   accounts: AccountsService;
   office: Office;
-  /** Pasta das sessões do Pi (HABBLAUD_PI_DIR ou ~/.pi/agent/sessions). */
+  /** Pasta das sessões do Pi (BUILDAGENT_PI_DIR ou ~/.pi/agent/sessions). */
   dir: string;
   now?: () => number;
   pollMs?: number;

@@ -4,7 +4,7 @@
 //   GET /api/history/:id     -> resumo da sessão (só o que a listagem já expõe:
 //                               título, projeto, firstAt/lastAt, size, open)
 // Adaptado: sem o parâmetro de terminal (não existe terminal neste servidor — o
-// `resolve()` do habblaud foi cortado), sem trava de Host local (o hostAllowed global
+// `resolve()` do projeto de origem foi cortado), sem trava de Host local (o hostAllowed global
 // do server/index.ts já cobre), e o chamador fornece o `send` de JSON (o buildagent
 // não tem um app.ts com sendJson). Sem GET nenhum escreve nada.
 import type { IncomingMessage, ServerResponse } from 'node:http';

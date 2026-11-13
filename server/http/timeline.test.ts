@@ -1,5 +1,5 @@
 // Portado de marmottajr/habblaud@faa1a01 server/http/timeline.test.ts (MIT)
-// Adaptado: o Habblaud montava a rota dentro do createApiHandler (que não existe no buildagent);
+// Adaptado: o projeto de origem montava a rota dentro do createApiHandler (que não existe no buildagent);
 // aqui o handler de timeline é ligado direto num http.Server — o mesmo contrato que o server/index.ts usa.
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';

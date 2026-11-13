@@ -1,5 +1,5 @@
 // Portado de marmottajr/habblaud@faa1a01 server/history/daystats.ts (MIT)
-// Adaptado: sem modo demo (o Habblaud alimentava um balde separado para os agentes fictícios;
+// Adaptado: sem modo demo (o projeto de origem alimentava um balde separado para os agentes fictícios;
 // no buildagent não há demo, então os campos `source`/`demoAvailable` das respostas foram cortados).
 // "Onde foi meu dia": amostra o escritório a cada segundo, acumula as estatísticas (shared/daystats.ts) e as
 // persiste em ${dataDir}/stats/AAAA-MM-DD.json (um arquivo por dia no fuso do servidor), a cada 30 s e ao

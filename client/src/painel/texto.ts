@@ -148,7 +148,7 @@ export const texto = {
       fechar: 'Fechar',
       corpo: [
         'O uso (janela de 5 h e semana) chega por uma das duas formas abaixo.',
-        '1. statusline (opcional, passo a passo no README): com o script scripts/statusline-uso.mjs ligado como statusline do Claude Code, o uso da conta é gravado em um arquivo local (~/.habblaud/usage/<conta>.json) e se atualiza enquanto a sessão roda. A barra mostra percentual e "reinicia em" a partir dele.',
+        '1. statusline (opcional, passo a passo no README): com o script scripts/statusline-uso.mjs ligado como statusline do Claude Code, o uso da conta é gravado em um arquivo local (~/.buildagent/usage/<conta>.json) e se atualiza enquanto a sessão roda. A barra mostra percentual e "reinicia em" a partir dele.',
         '2. /usage: rode o comando /usage na conta para atualizar o cache; os números envelhecem até a próxima vez — por isso a barra marca leituras antigas como "antigo".',
         'Sem fonte ligada, a conta aparece "sem dados de uso". Contas do Codex só registram uso enquanto alguma sessão roda; "sem cota" significa que a conta está sem cota nem créditos agora (não é 0% usado).',
       ],

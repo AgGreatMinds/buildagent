@@ -419,7 +419,7 @@ export function montarLista({ aoSelecionar, aoMudarSala }: OpcoesLista): ApiList
   }
 
   // Renomear inline (Enter salva, Esc cancela, blur salva, vazio volta ao nome do snapshot —
-  // adaptado do RoomRenamer do Habblaud, sem fetch: o apelido vive só em localStorage).
+  // adaptado do RoomRenamer do projeto de origem, sem fetch: o apelido vive só em localStorage).
   function renomear(id: string): void {
     const r = salasDom.get(id);
     const g = grupos.find((x) => x.id === id);

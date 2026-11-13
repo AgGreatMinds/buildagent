@@ -14,7 +14,7 @@ Node.js 22.13 ou mais novo. `npm install`, depois `npm run dev` (servidor) e `np
 
 ## Regras da casa
 
-- **Somente leitura.** O servidor não escreve fora de `HABBLAUD_DATA_DIR` e não faz requisição para fora.
+- **Somente leitura.** O servidor não escreve fora de `BUILDAGENT_DATA_DIR` e não faz requisição para fora.
   Pull request que quebre isso não entra.
 - **Conteúdo de conversa não vai para a tela nem para log.** As fontes extraem estado e tipo de
   atividade, não o texto das mensagens.

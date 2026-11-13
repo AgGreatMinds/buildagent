@@ -2,7 +2,7 @@
 // Cortado: o `hint` do RolloutIndex (só era alimentado por eventos de hook, que este
 // servidor não expõe — GET-only). O resto é idêntico: leitura de locks, rollouts e do
 // começo do arquivo. Compactados (.jsonl.zst) ainda não são lidos (mesmo limite do
-// Habblaud: a presença entra no `compressedOnly` e um aviso único vai para o log).
+// projeto de origem: a presença entra no `compressedOnly` e um aviso único vai para o log).
 //
 // Arquivos de uma pasta do Codex (CODEX_HOME) que a fonte lê: os rollouts
 // (sessions/AAAA/MM/DD/ e archived_sessions/) e os locks dos threads carregados

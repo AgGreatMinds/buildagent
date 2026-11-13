@@ -2,7 +2,7 @@
 // Adaptado: aqui a pasta usageDir só é lida; quem grava os arquivos é o tap opcional
 // scripts/statusline-uso.mjs (o scripts/statusline-tap.mjs original não foi portado).
 // Fonte 'statusline' de uso: arquivos <usageDir>/<conta>.json com o JSON que o Claude Code envia
-// ao comando de statusline (campo rate_limits) ou que o mod do Claude Code grava (mod/habblaud).
+// ao comando de statusline (campo rate_limits) ou que o mod do Claude Code grava.
 // Não lê credenciais nem chama API nenhuma: só arquivos pequenos, relidos a cada ~5 s.
 //
 // Formato (o tap grava SÓ isto; o mod acrescenta "source": "mod", que vira AccountUsage.via):

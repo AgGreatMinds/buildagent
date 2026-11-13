@@ -13,7 +13,7 @@ const get = (path: string) => fetch(`http://127.0.0.1:${PORT}${path}`);
 
 beforeAll(async () => {
   base = mkdtempSync(join(tmpdir(), 'buildagent-demo-'));
-  handle = start({ HOME: join(base, 'home'), HABBLAUD_DEMO: '1', HABBLAUD_PORT: String(PORT), HABBLAUD_DATA_DIR: join(base, 'data'), HABBLAUD_UPDATE_CHECK: '0' });
+  handle = start({ HOME: join(base, 'home'), BUILDAGENT_DEMO: '1', BUILDAGENT_PORT: String(PORT), BUILDAGENT_DATA_DIR: join(base, 'data'), BUILDAGENT_UPDATE_CHECK: '0' });
   await new Promise<void>((ok) => handle.server.once('listening', () => ok()));
 });
 

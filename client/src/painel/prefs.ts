@@ -3,7 +3,7 @@
 // som/volume/notificações (motor de áudio), modo conteúdo, idioma do diálogo
 // de configurações e visibilidade dos painéis. Puro: o armazenamento é
 // injetado (testável em node, sem DOM); JSON corrompido ou campo desconhecido
-// cai no padrão campo a campo (mesmo padrão do habblaud).
+// cai no padrão campo a campo (mesmo padrão do projeto de origem).
 // Migração de chave: a chave antiga 'buildagent.prefsSom' (som.ts c5) é
 // obsoleta — o campo de som é o mesmo, então a migração não copiar nada.
 

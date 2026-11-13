@@ -1,5 +1,5 @@
 // Portado de marmottajr/habblaud@faa1a01 server/http/timeline.ts (MIT)
-// Adaptado: sendJson local (o buildagent não tem o app.ts do Habblaud); a resposta dos dias traz
+// Adaptado: sendJson local (o buildagent não tem o app.ts do projeto de origem); a resposta dos dias traz
 // o campo `recording` (true quando o gravador está ligado). Mesma exposição do /api/snapshot.
 // Rotas do timelapse (linha do tempo gravada por history/timeline.ts):
 //   GET /api/timeline/days    -> {recording, days: [{day, bytes, from, to}]} (do mais recente ao mais antigo)

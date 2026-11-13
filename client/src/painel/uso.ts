@@ -44,7 +44,7 @@ export function agruparPorProvedor(
 }
 
 /**
- * Estado efetivo da conta (regra idêntica à cardState do Habblaud):
+ * Estado efetivo da conta (regra idêntica à cardState do projeto de origem):
  * "sem cota" vem antes — a leitura não traz janelas, mas não é "sem dados";
  * leitura sem nenhuma das janelas vale como "sem dados".
  */

@@ -1,5 +1,5 @@
 // Portado de marmottajr/habblaud@faa1a01 server/history/timeline.ts (MIT)
-// Adaptado: sem modo demo (a opção isDemo e os marcadores `demo: true` do Habblaud foram cortados;
+// Adaptado: sem modo demo (a opção isDemo e os marcadores `demo: true` do projeto de origem foram cortados;
 // compactSnapshot no buildagent não tem parâmetro de demo). Escreve SÓ dentro da pasta de dados do
 // buildagent (<config.dataDir>/timeline) — nunca em pastas do Claude/Codex.
 // Gravador da linha do tempo do escritório (timelapse). Grava em <dataDir>/timeline/AAAA-MM-DD.jsonl

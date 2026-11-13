@@ -77,7 +77,7 @@ export function githubEventKey(ev: GitHubEvent): string {
 }
 
 export interface GitHubEventText {
-  /** Aviso (toast). Ex.: "🎉 Danilo abriu o PR #12 em habblaud". */
+  /** Aviso (toast). Ex.: "🎉 Danilo abriu o PR #12 em buildagent". */
   notice: string;
   level: NoticeLevel;
   /** Atividade do agente (feed e linha do tempo), com o marcador GITHUB_TOOL. */

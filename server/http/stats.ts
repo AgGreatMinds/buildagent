@@ -1,6 +1,6 @@
 // Portado de marmottajr/habblaud@faa1a01 server/http/stats.ts (MIT)
 // Adaptado: sem o parâmetro `source`/modo demo (cortado do buildagent); a mensagem de retenção
-// não menciona a marca do Habblaud. Contrato local: o chamador (server/index.ts) fornece o
+// não menciona a marca do projeto de origem. Contrato local: o chamador (server/index.ts) fornece o
 // `send` de JSON — o buildagent não tem um app.ts com sendJson.
 // Rotas do "Meu dia": GET /api/stats?day=AAAA-MM-DD&tz=<IANA> e GET /api/stats/days?tz=<IANA>.
 // Só números agregados e nomes de projeto, conta e agente — a mesma exposição do /api/snapshot.

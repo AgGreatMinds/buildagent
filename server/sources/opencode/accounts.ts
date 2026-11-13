@@ -5,7 +5,7 @@
 // `provider: 'opencode'` e aparece no escritório como a letra "O".
 //
 // Privacidade: não se lê credencial nem arquivo de configuração — só o caminho do banco.
-// No Docker, HABBLAUD_OPENCODE_DB dá o caminho do banco montado; fora do Docker é o padrão do host.
+// No Docker, BUILDAGENT_OPENCODE_DB dá o caminho do banco montado; fora do Docker é o padrão do host.
 import { existsSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -26,20 +26,20 @@ function isFile(p: string): boolean {
   }
 }
 
-/** Banco padrão do OpenCode: HABBLAUD_OPENCODE_DB ou $HOME/.local/share/opencode/opencode.db. */
+/** Banco padrão do OpenCode: BUILDAGENT_OPENCODE_DB ou $HOME/.local/share/opencode/opencode.db. */
 export function defaultOpenCodeDb(env: NodeJS.ProcessEnv, home: string): string {
-  const raw = env.HABBLAUD_OPENCODE_DB?.trim();
+  const raw = env.BUILDAGENT_OPENCODE_DB?.trim();
   if (raw) return expandHome(raw, home);
   return join(home, '.local', 'share', 'opencode', 'opencode.db');
 }
 
 /**
- * Pastas (um por banco) observadas. HABBLAUD_OPENCODE_DIRS (lista separada por vírgula, cada item sendo a pasta
+ * Pastas (um por banco) observadas. BUILDAGENT_OPENCODE_DIRS (lista separada por vírgula, cada item sendo a pasta
  * que contém o `opencode.db` ou o próprio caminho do .db) substitui a detecção. Senão, o banco padrão.
  * Só entra se o arquivo existir (sem ele não há o quê ler).
  */
 export function discoverOpenCodeDirs(env: NodeJS.ProcessEnv = process.env, home: string = env.HOME || homedir()): string[] {
-  const override = splitList(env.HABBLAUD_OPENCODE_DIRS);
+  const override = splitList(env.BUILDAGENT_OPENCODE_DIRS);
   if (override.length) {
     const dirs = override.map((p) => expandHome(p, home));
     // Um item pode ser a pasta do banco ou o próprio caminho do .db; normaliza para o caminho do arquivo.

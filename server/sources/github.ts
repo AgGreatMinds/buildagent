@@ -2,7 +2,7 @@
 // Cortado do original: detectGitHubResult (parser de resultado/transcript), leitura de CI
 // (JSON/gh run watch, código de saída), release, eventos MCP e detectGitHubNotification
 // (dependem do parser de transcript das sessões — fora de escopo). Também cortado o
-// "github-live" (consulta do GitHub com token/rede, server/deliveries/fetcher.ts do Habblaud):
+// "github-live" (consulta do GitHub com token/rede, server/deliveries/fetcher.ts do projeto de origem):
 // NÃO foi portado — nada de token, rede ou escrita.
 // O que sobrou: os helpers de comando (scriptSegments, bashCall, githubCallOf + tipos) e os
 // regex de PR/push na saída — usados para extrair o nº do PR de mensagens de merge de commit

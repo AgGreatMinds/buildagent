@@ -162,8 +162,8 @@ describe('opencode/accounts', () => {
     dir = mkdtempSync(join(tmpdir(), 'opencode-acct-'));
   });
 
-  it('defaultOpenCodeDb: HABBLAUD_OPENCODE_DB com ~ expandida; senão o padrão do home', () => {
-    expect(defaultOpenCodeDb({ HABBLAUD_OPENCODE_DB: '~/db/opencode.db' } as NodeJS.ProcessEnv, '/home/u')).toBe('/home/u/db/opencode.db');
+  it('defaultOpenCodeDb: BUILDAGENT_OPENCODE_DB com ~ expandida; senão o padrão do home', () => {
+    expect(defaultOpenCodeDb({ BUILDAGENT_OPENCODE_DB: '~/db/opencode.db' } as NodeJS.ProcessEnv, '/home/u')).toBe('/home/u/db/opencode.db');
     expect(defaultOpenCodeDb({} as NodeJS.ProcessEnv, '/home/u')).toBe('/home/u/.local/share/opencode/opencode.db');
   });
 
@@ -171,7 +171,7 @@ describe('opencode/accounts', () => {
     const db = join(dir, 'opencode.db');
     writeFileSync(db, Buffer.from('x'));
     // Dois itens: a pasta do banco (existe) e um caminho .db inexistente (mantido na lista, mas inerte).
-    const env = { HABBLAUD_OPENCODE_DIRS: `${dir},${join(dir, 'outro', 'opencode.db')}` } as NodeJS.ProcessEnv;
+    const env = { BUILDAGENT_OPENCODE_DIRS: `${dir},${join(dir, 'outro', 'opencode.db')}` } as NodeJS.ProcessEnv;
     expect(discoverOpenCodeDirs(env, '/home/u')).toEqual([db, join(dir, 'outro', 'opencode.db')]);
   });
 

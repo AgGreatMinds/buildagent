@@ -64,10 +64,10 @@ describe('painel (stats + timeline ligadas)', () => {
     // as gravações de stats/timeline não tocam em casa alguma.
     const env = {
       ...process.env,
-      HABBLAUD_PORT: String(port),
+      BUILDAGENT_PORT: String(port),
       HOME: tmp,
-      HABBLAUD_DATA_DIR: join(tmp, 'data'),
-      HABBLAUD_USAGE_DIR: join(tmp, 'usage'),
+      BUILDAGENT_DATA_DIR: join(tmp, 'data'),
+      BUILDAGENT_USAGE_DIR: join(tmp, 'usage'),
     };
     handle = start(env);
     await new Promise<void>((r) => handle.server.once('listening', () => r()));
@@ -95,7 +95,7 @@ describe('painel (stats + timeline ligadas)', () => {
     const r = await request(port, { path: '/api/timeline/days' });
     expect(r.status).toBe(200);
     const body = JSON.parse(r.body) as { recording: boolean; days: unknown[] };
-    expect(body.recording).toBe(true); // timeline ligada por padrão (HABBLAUD_TIMELINE ausente)
+    expect(body.recording).toBe(true); // timeline ligada por padrão (BUILDAGENT_TIMELINE ausente)
     expect(Array.isArray(body.days)).toBe(true);
   });
 

@@ -85,7 +85,7 @@ export interface OfficeDeps {
   updates?: () => UpdateStatus;
   /** Terminais interativos (PtyManager): estado do recurso e os abertos. */
   ptys?: () => { status: PtyStatus; list: PtyInfo[] };
-  /** Habblaud World (WorldService.meta; ver OfficeSnapshot.meta.world). */
+  /** World do projeto de origem (WorldService.meta; ver OfficeSnapshot.meta.world). */
   world?: () => WorldMeta;
   /**
    * Agente aberto por um app (OpenBot): dado o cwd, devolve o nome e o cargo do cadastro do app. O nome vira o do

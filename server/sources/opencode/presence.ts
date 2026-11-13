@@ -22,7 +22,7 @@ try {
  * conjunto vazio = app aberto, mas sem sessão de agente.
  */
 export function readOpenSessionIds(env: NodeJS.ProcessEnv = process.env, home: string = env.HOME || homedir()): Set<string> | undefined {
-  const raw = env.HABBLAUD_OPENCODE_DRAFTS?.trim();
+  const raw = env.BUILDAGENT_OPENCODE_DRAFTS?.trim();
   const candidates = raw
     ? [expandHome(raw, home)]
     : [

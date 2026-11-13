@@ -78,7 +78,7 @@ describe('estadoDaConta', () => {
       usageStatus: 'stale',
     });
     expect(estadoDaConta(stale)).toBe('stale');
-    // 'unavailable'/'disabled' com janelas também é stale (regra do Habblaud)
+    // 'unavailable'/'disabled' com janelas também é stale (regra do projeto de origem)
     expect(
       estadoDaConta(conta('a', { usage: { source: 'codex', fetchedAt: AGORA, fiveHour: janelas[0] }, usageStatus: 'unavailable' })),
     ).toBe('stale');

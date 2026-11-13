@@ -1,4 +1,4 @@
-// Simulador de demonstração (`npm run demo` ou HABBLAUD_DEMO=1): um escritório fictício para quem acabou de
+// Simulador de demonstração (`npm run demo` ou BUILDAGENT_DEMO=1): um escritório fictício para quem acabou de
 // baixar o projeto ver o prédio funcionando sem ter nenhum agente aberto, e para gravar tela sem expor
 // projeto real. Nada aqui lê disco, rede ou relógio: o estado é função pura do tempo decorrido, então o
 // mesmo instante produz sempre o mesmo snapshot (testável e repetível).

@@ -2,12 +2,12 @@
 // Apelido local da sala (projeto) e ordem dos grupos, só no navegador (localStorage):
 // o servidor continua servindo o nome do snapshot — o apelido é um rótulo de exibição.
 // Lógica pura com storage injetável (mesmo padrão de prefs.ts): os testes rodam em node.
-// A normalização do nome segue server/model/room-aliases.ts do Habblaud: espaços colapsados,
+// A normalização do nome segue server/model/room-aliases.ts do projeto de origem: espaços colapsados,
 // trim, teto de 40 caracteres; vazio apaga o apelido (volta ao nome do snapshot).
 
-/** Teto de comprimento do apelido (referência: ROOM_NAME_MAX do Habblaud). */
+/** Teto de comprimento do apelido (referência: ROOM_NAME_MAX do projeto de origem). */
 export const NOME_MAX = 40;
-/** Salas lembradas na ordem guardada (idempotente — idêntico ao MAX_ROOMS do Habblaud). */
+/** Salas lembradas na ordem guardada (idempotente — idêntico ao MAX_ROOMS do projeto de origem). */
 const MAX_SALAS = 100;
 
 /** Chaves do localStorage (prefixo buildagent. para não colidir com 'buildagent.prefs'). */

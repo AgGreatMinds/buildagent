@@ -1,6 +1,6 @@
 // Adaptado de marmottajr/habblaud@faa1a01 server/sources/opencode/source.ts (MIT)
 // Cortados: a option `watch` (nunca usada pela fonte) e o flag `stopped` (só era escrito, nunca lido).
-// `readOpenSessionIds` recebe o `env` da option (injetável em teste; padrão process.env) — o Habblaud
+// `readOpenSessionIds` recebe o `env` da option (injetável em teste; padrão process.env) — o projeto de origem
 // chamava sem args (HOME real).
 // Fonte de agentes do OpenCode (AgentSource 'opencode', ver sources/source.ts): observa as sessões ATIVAS do banco
 // local (~/.local/share/opencode/opencode.db, SQLite) e alimenta o Office.
@@ -36,7 +36,7 @@ export interface OpenCodeSourceOptions {
   office: Office;
   /** Caminhos dos bancos observados (um por conta), a pasta que contém o `opencode.db` ou o próprio .db. */
   dirs: string[];
-  /** Env lido por presence (HABBLAUD_OPENCODE_DRAFTS); padrão process.env. */
+  /** Env lido por presence (BUILDAGENT_OPENCODE_DRAFTS); padrão process.env. */
   env?: NodeJS.ProcessEnv;
   /** Home para presence e discover; padrão env.HOME || os.homedir(). */
   home?: string;
@@ -137,7 +137,7 @@ export class OpenCodeSource implements AgentSource {
     const now = this.now();
     // Presença: a lista de sessões ABERTAS vem do app (drafts.sqlite). Sem ela, cai no fallback da recência
     // (RECENT_WINDOW_MS) para não quebrar quem só tem o banco principal. `env`/`home` vêm das options
-    // (padrão process.env no Habblaud: undefined aqui cai no default do presence.ts).
+    // (padrão process.env no projeto de origem: undefined aqui cai no default do presence.ts).
     const openIds = readOpenSessionIds(this.opts.env, this.opts.home);
     const present = new Map<string, { kind: 'main' | 'sub'; parentKey?: string; status: AgentStatus; session: OpenCodeSession; dir: string }>();
     for (let i = 0; i < this.opts.dirs.length; i++) {

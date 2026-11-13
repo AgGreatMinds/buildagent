@@ -197,7 +197,7 @@ export const textoEn: {
       fechar: 'Close',
       corpo: [
         'Usage (5 h and week windows) arrives in one of two ways below.',
-        '1. statusline (optional, steps in the README): with the scripts/statusline-uso.mjs script set as Claude Code\'s statusline, the account\'s usage is written to a local file (~/.habblaud/usage/<account>.json) and refreshes while a session runs. The bar shows the percentage and "resets in" from it.',
+        '1. statusline (optional, steps in the README): with the scripts/statusline-uso.mjs script set as Claude Code\'s statusline, the account\'s usage is written to a local file (~/.buildagent/usage/<account>.json) and refreshes while a session runs. The bar shows the percentage and "resets in" from it.',
         '2. /usage: run the /usage command on the account to refresh the cache; the numbers age until next time — that is why the bar marks old reads as "stale".',
         'With no source hooked up, the account shows "no usage data". Codex accounts only record usage while a session runs; "no quota" means the account has no quota or credits right now (it is not 0% used).',
       ],

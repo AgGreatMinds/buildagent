@@ -1,7 +1,7 @@
 // Adaptado de marmottajr/habblaud@faa1a01 server/sources/codex/source.ts (MIT)
 // Cortado para o contrato GET-only do buildagent:
 // - hooks do Codex (CodexLive/applyHookEvent e toda a lógica de presença por hook) — o
-//   Habblaud os recebia em POST /api/codex/events; este servidor não aceita POST;
+//   projeto de origem os recebia em POST /api/codex/events; este servidor não aceita POST;
 // - parser de terminal do Codex (sources/terminal.ts não foi portado);
 // - .zst compactados: sem suporte de leitura, sem aviso de log (presença só por
 //   lock/rollout recente);

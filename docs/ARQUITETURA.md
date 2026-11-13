@@ -20,7 +20,7 @@ arquivos de sessão no disco ──► server/sources/* ──► server/model (
 | `http/` | Rotas (`snapshot`, `stream` por SSE, `stats`, `history`, `session`, `timeline`), o guarda de `Host`/`Origin` e `static.ts`, que entrega a interface construída pela mesma porta. |
 | `demo/` | Simulador do modo demonstração: agentes fictícios, nenhuma leitura real. |
 
-Garantias que os testes cobram: nenhuma escrita fora de `HABBLAUD_DATA_DIR`, nenhuma requisição para fora,
+Garantias que os testes cobram: nenhuma escrita fora de `BUILDAGENT_DATA_DIR`, nenhuma requisição para fora,
 só `GET`/`HEAD`, nenhum caminho fora da pasta servida.
 
 O contrato com a interface está em `shared/types.ts` (`Snapshot`, `Room`, `Agent`, `Provider`).

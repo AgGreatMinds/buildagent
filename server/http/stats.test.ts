@@ -1,7 +1,7 @@
 // Portado de marmottajr/habblaud@faa1a01 server/http/stats.test.ts (MIT)
 // Adaptado: sem o modo demo (bloco "com o demo ligado" cortado), sem `source`/`demoAvailable`
 // nas respostas, e o RoomDayStats do buildagent não tem `sessions`. O handler de API completo do
-// Habblaud (createApiHandler) não existe no buildagent — o servidor aqui usa as funções puras
+// projeto de origem (createApiHandler) não existe no buildagent — o servidor aqui usa as funções puras
 // (parseStatsQuery + handleStatsRoute) ligadas ao server/index.ts.
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';

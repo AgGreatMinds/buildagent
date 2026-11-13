@@ -2,7 +2,7 @@
 // Diálogo "Como ler o prédio" (botão `?`): legenda de status/cores, o espaço do prédio
 // (áreas comuns com a regra de 30 min, fileiras de projeto, sala de guerra, andar 2),
 // câmeras/teclas e a ressalva de dados de EXEMPLO. Aqui só o DOM; as strings em texto.ts.
-// Sem referência a pixel art nem ao Habblaud — a legenda fala do prédio 3D deste app.
+// Sem referência a pixel art nem ao projeto de origem — a legenda fala do prédio 3D deste app.
 import { texto } from './texto';
 import type { AgentStatus } from '../../../shared/types';
 import './painel.css';

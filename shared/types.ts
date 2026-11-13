@@ -185,12 +185,12 @@ export interface AgentInfo {
   /** Subagente rodando em segundo plano. */
   background?: boolean;
   /**
-   * Pedido de permissão que dá para responder pelo Habblaud (hook PermissionRequest; o mais antigo, se
+   * Pedido de permissão que dá para responder pelo BuildAgent (hook PermissionRequest; o mais antigo, se
    * houver vários). Enquanto existe, o agente aparece como 'waiting'. Ver PermissionRequestInfo.
    */
   permission?: PermissionRequestInfo;
   /**
-   * Dá para mandar mensagem a este agente pelo Habblaud (só principais): a sessão tem o plugin habblaud-mensagens
+   * Dá para mandar mensagem a este agente pelo BuildAgent (só principais): a sessão tem o plugin de mensagens do projeto de origem
    * e perguntou pela caixa de entrada há pouco. Ver POST /api/messages.
    */
   canMessage?: boolean;
@@ -242,7 +242,7 @@ export interface RoomEffect {
  */
 export interface UpdateStatus {
   /**
-   * - off: verificação desligada (HABBLAUD_UPDATE_CHECK=0 ou package.json sem repositório no GitHub);
+   * - off: verificação desligada (BUILDAGENT_UPDATE_CHECK=0 ou package.json sem repositório no GitHub);
    * - pending: ainda não verificou;
    * - ok: verificou (com ou sem release publicada);
    * - error: a última tentativa falhou (sem internet, limite de consultas do GitHub...).
@@ -293,13 +293,13 @@ export interface AccountUsage {
   sevenDaySonnet?: UsageWindow;
   /**
    * Origem dos números (todas são arquivos locais gravados pela própria ferramenta):
-   * - 'statusline': capturado ao vivo e gravado em ~/.habblaud/usage/<conta>.json pelo mod do Habblaud
-   *   (mod/habblaud, recomendado) ou pelo scripts/statusline-tap.mjs (campo rate_limits do statusline);
+   * - 'statusline': capturado ao vivo e gravado em ~/.buildagent/usage/<conta>.json pelo mod do projeto de origem
+   *   (recomendado lá) ou pelo scripts/statusline-tap.mjs (campo rate_limits do statusline);
    * - 'cache': `cachedUsageUtilization` gravado pelo próprio Claude Code (atualiza quando alguém roda /usage);
    * - 'codex': `rate_limits` dos arquivos de sessão do Codex (só se renovam enquanto alguma sessão roda).
    */
   source: 'cache' | 'statusline' | 'codex';
-  /** Quem gravou o arquivo ao vivo ('statusline'): o mod do Habblaud no Claude Code ou o tap de statusline. */
+  /** Quem gravou o arquivo ao vivo ('statusline'): o mod do projeto de origem no Claude Code ou o tap de statusline. */
   via?: 'mod' | 'tap';
   /**
    * Conta sem cota nem créditos para usar agora (Codex: `rate_limits.primary` nulo, ex.: créditos do workspace
@@ -348,7 +348,7 @@ export interface OfficeSnapshot {
   serverTime: number;
   rooms: RoomInfo[];
   agents: AgentInfo[];
-  /** Terminais interativos abertos pelo Habblaud (Claude Code rodando dentro do navegador). */
+  /** Terminais interativos abertos pelo BuildAgent (Claude Code rodando dentro do navegador). */
   ptys?: PtyInfo[];
   /** Contas do Claude detectadas (com uso de 5h/semanal quando disponível). */
   accounts: AccountInfo[];
@@ -363,12 +363,12 @@ export interface OfficeSnapshot {
      */
     build?: string;
     /**
-     * Terminal (GET /api/agents/:id/terminal) disponível: só quando o Habblaud não fica
+     * Terminal (GET /api/agents/:id/terminal) disponível: só quando o BuildAgent não fica
      * exposto além do próprio computador (bind local). Ausente/false = recurso desligado.
      */
     terminal?: boolean;
     /**
-     * Mensagens pelo escritório ligadas (POST /api/messages): a mesma trava do terminal e HABBLAUD_MENSAGENS sem
+     * Mensagens pelo escritório ligadas (POST /api/messages): a mesma trava do terminal e BUILDAGENT_MENSAGENS sem
      * desligar. Quem recebe agora diz AgentInfo.canMessage. Ausente/false = recurso desligado.
      */
     messages?: boolean;
@@ -380,9 +380,9 @@ export interface OfficeSnapshot {
     /** Verificação de versão nova no GitHub (ausente nos testes e no timelapse). */
     updates?: UpdateStatus;
     /**
-     * Habblaud World (server/world/): `enabled` = a seção aparece (HABBLAUD_WORLD não é 0 e o servidor do mundo foi
-     * aceito: o padrão, server.habblaud.com, ou uma HABBLAUD_WORLD_URL válida; recusada, o recurso fica desligado e nada
-     * do World aparece); `configured` = servidor do mundo aceito; `state` = a
+     * World do projeto de origem (recurso não portado): `enabled` = a seção aparece (recurso ligado e servidor do mundo
+     * aceito — o servidor padrão do projeto de origem ou um endereço configurado e válido; recusado, o recurso fica desligado
+     * e nada do World aparece); `configured` = servidor do mundo aceito; `state` = a
      * conta neste computador; `building` (aditivo, só com a conta aprovada e o personagem criado) = o resumo do prédio
      * no mundo: conectado, pausado, andares e agentes da última remessa e a hora dela, se saiu do mundo e se o servidor
      * do mundo o parou (sem o motivo, que só vai no status). Nada da conta além disso (o snapshot também vai ao celular
@@ -394,7 +394,7 @@ export interface OfficeSnapshot {
 
 /**
  * O que ESTA página pode fazer (GET /api/access): a porta local libera tudo pelo Host local; a porta remota com login
- * (server/http/remote.ts) só o que HABBLAUD_REMOTE_ALLOW liberar. `local` = aberta pelo próprio computador (editar
+ * (recurso não portado) só o que a configuração de acesso remoto liberar. `local` = aberta pelo próprio computador (editar
  * personagem e renomear salas, que nunca valem pela porta remota).
  */
 export interface AccessInfo {
@@ -406,7 +406,7 @@ export interface AccessInfo {
   /** Pode abrir agentes novos no app do Claude (POST /api/spawn). */
   spawn: boolean;
   /**
-   * Pode usar a conta do Habblaud World (/api/world/*): recurso ligado (HABBLAUD_WORLD), trava do terminal e porta local
+   * Pode usar a conta do World do projeto de origem (/api/world/*): recurso ligado, trava do terminal e porta local
    * com Host local. Ausente em servidores antigos.
    */
   world?: boolean;
@@ -454,13 +454,13 @@ export interface AgentDetail {
 // ------------------------------------------------------------------ mod do Claude Code
 
 /**
- * Resposta de GET /api/mod/summary: o mínimo que o mod do Claude Code (mod/habblaud) precisa para a linha
- * "precisa de você" embaixo do prompt e para o comando /habblaud. Só agentes reais (o demo fica de fora)
+ * Resposta de GET /api/mod/summary: o mínimo que o mod do Claude Code precisa para a linha
+ * "precisa de você" embaixo do prompt e para o comando do mod. Só agentes reais (o demo fica de fora)
  * e presentes (sem quem já encerrou ou entregou); com `?session=` (e `?account=`), sem a própria sessão
  * de quem pergunta: o agente principal dela e os subagentes.
  */
 export interface ModSummary {
-  /** Versão do Habblaud em uso. */
+  /** Versão do BuildAgent em uso. */
   version: string;
   /** Agentes presentes e quantos estão trabalhando. */
   agents: number;
@@ -634,9 +634,9 @@ export interface PermissionSuggestionInfo {
 }
 
 /**
- * Pedido de permissão pendente que dá para responder pelo Habblaud: o hook PermissionRequest do Claude Code
- * (mod/habblaud-permissoes/hooks/permission-hook.mjs) o registra e fica esperando a decisão. Só existe com bind local (a mesma
- * trava do terminal) e com alguma página do Habblaud aberta.
+ * Pedido de permissão pendente que dá para responder pelo BuildAgent: o hook PermissionRequest do Claude Code
+ * (hook de permissão do projeto de origem) o registra e fica esperando a decisão. Só existe com bind local (a mesma
+ * trava do terminal) e com alguma página do BuildAgent aberta.
  * No snapshot vai sem `input` (os argumentos completos só saem por GET /api/permissions/:id, com acesso
  * local); os pedidos fictícios do demo já vêm com ele.
  */
@@ -654,7 +654,7 @@ export interface PermissionRequestInfo {
   /** Argumentos (comando, diff, JSON...), mascarados e truncados. */
   input?: string;
   inputKind?: TerminalInputKind;
-  /** Pedido de um subagente que o Habblaud ainda não mostra: o tipo dele (ex.: "Explore"). */
+  /** Pedido de um subagente que o BuildAgent ainda não mostra: o tipo dele (ex.: "Explore"). */
   subagent?: string;
   /** Regras "sempre permitir" que podem ser aplicadas junto com a aprovação. */
   suggestions?: PermissionSuggestionInfo[];
@@ -727,7 +727,7 @@ export interface PtyStatus {
   reason?: string;
 }
 
-/** Terminal interativo aberto pelo Habblaud (node-pty no servidor, xterm.js no navegador). */
+/** Terminal interativo aberto pelo BuildAgent (node-pty no servidor, xterm.js no navegador). */
 export interface PtyInfo {
   id: string;
   /** PID do Claude Code: o agente correspondente é `${account}:${pid}` (= agentId). */
@@ -744,7 +744,7 @@ export interface PtyInfo {
   exitCode?: number;
 }
 
-/** Mensagem entregue ao plugin habblaud-mensagens (POST /api/mod/inbox). */
+/** Mensagem entregue ao plugin de mensagens do projeto de origem (POST /api/mod/inbox). */
 export interface InboxMessage {
   id: string;
   /** O texto como foi digitado: o plugin o manda à sessão como se você o tivesse digitado. */

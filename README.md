@@ -9,6 +9,25 @@ pede a sua atenção quando precisa de você e vai embora quando termina.
 ![O prédio visto de fora](docs/img/predio.png)
 ![Andar de trabalho: uma fileira de mesas por projeto](docs/img/andar.png)
 
+## Por dentro do prédio
+
+<table>
+<tr>
+<td width="50%"><img src="docs/img/mesas.jpg" alt="Andar de trabalho de perto: quem está trabalhando senta na fileira do projeto"><br><sub>Andar de trabalho de perto: quem está trabalhando senta na fileira do projeto</sub></td>
+<td width="50%"><img src="docs/img/detalhe.jpg" alt="Detalhe do agente: o que ele faz agora, subagentes e linha do tempo"><br><sub>Detalhe do agente: o que ele faz agora, subagentes e linha do tempo</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/img/terreo.jpg" alt="Térreo: quem chega passa pela recepção, pela catraca e sobe de elevador"><br><sub>Térreo: quem chega passa pela recepção, pela catraca e sobe de elevador</sub></td>
+<td width="50%"><img src="docs/img/descanso.jpg" alt="Área de descanso do andar de trabalho"><br><sub>Área de descanso do andar de trabalho</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/img/reuniao.jpg" alt="Andar 2: sala de reunião e galeria"><br><sub>Andar 2: sala de reunião e galeria</sub></td>
+<td width="50%"><img src="docs/img/cobertura.jpg" alt="Cobertura vista de fora, com o letreiro"><br><sub>Cobertura vista de fora, com o letreiro</sub></td>
+</tr>
+</table>
+
+Todas as imagens são do modo demonstração (agentes fictícios).
+
 ## O que ele lê
 
 O BuildAgent **só lê** arquivos que as ferramentas já gravam no seu computador. Não envia nada para fora,
@@ -17,10 +36,10 @@ não pede chave de API e não escreve nas pastas dos agentes.
 | Ferramenta | De onde vem | Desligar |
 |---|---|---|
 | Claude Code | `~/.claude` (e outras pastas de conta) | — |
-| Codex | `~/.codex` | `HABBLAUD_CODEX=0` |
-| OpenCode | banco local do OpenCode | `HABBLAUD_OPENCODE=0` |
-| Pi | `~/.pi/agent/sessions` | `HABBLAUD_PI=0` |
-| OpenBot | cadastro local (só nome, cargo e pasta do agente) | `HABBLAUD_OPENBOT=0` |
+| Codex | `~/.codex` | `BUILDAGENT_CODEX=0` |
+| OpenCode | banco local do OpenCode | `BUILDAGENT_OPENCODE=0` |
+| Pi | `~/.pi/agent/sessions` | `BUILDAGENT_PI=0` |
+| OpenBot | cadastro local (só nome, cargo e pasta do agente) | `BUILDAGENT_OPENBOT=0` |
 
 O texto das conversas não é copiado para a tela: o balão de cada pessoa mostra o estado e o tipo de
 atividade ("editando", "rodando teste"). Os painéis mostram nome do projeto, pasta e o título da sessão
@@ -44,6 +63,36 @@ npm run build && npm start
 ```
 
 Abra `http://127.0.0.1:4750`. Uma porta só serve a interface e os dados.
+
+### Instalar com o seu agente de IA (já com a sua marca)
+
+Se você usa Claude Code, Codex ou outro agente que roda comandos no seu computador, cole o texto abaixo.
+Ele instala, pergunta como você quer o prédio e sobe tudo:
+
+```text
+Instale o BuildAgent no meu computador e deixe com a minha marca.
+
+1. Confira que o Node.js é 22.13 ou mais novo (node -v). Se não for, pare e me avise.
+2. Clone https://github.com/AgGreatMinds/buildagent.git e rode "npm install" dentro da pasta.
+3. Antes de personalizar, me pergunte, uma coisa por vez:
+   - o nome que vai no letreiro da fachada (até 20 caracteres; acento é removido);
+   - se tenho uma logo em SVG (peça o caminho do arquivo): ela vai em relevo na fachada e na recepção;
+   - se tenho um símbolo em SVG para o canto do painel;
+   - a porta (padrão 4750);
+   - quais destas ferramentas desligar: Codex, OpenCode, Pi, OpenBot (o Claude Code fica sempre ligado).
+4. Crie a pasta client/public/local/ e grave nela:
+   - predio.json com { "nome": "NOME QUE EU ESCOLHI" };
+   - logo.svg e simbolo.svg, se eu tiver passado os arquivos.
+5. Se a porta ou as ferramentas fugirem do padrão, copie .env.example para .env e ajuste só
+   BUILDAGENT_PORT e, para desligar uma ferramenta, BUILDAGENT_CODEX=0, BUILDAGENT_OPENCODE=0,
+   BUILDAGENT_PI=0 ou BUILDAGENT_OPENBOT=0. Não mude BUILDAGENT_HOST.
+6. Rode "npm run build" e depois "npm run demo", e me passe o endereço (http://127.0.0.1:PORTA)
+   para eu ver o prédio com agentes fictícios.
+7. Quando eu aprovar, pare o demo e rode "npm start" para mostrar os meus agentes de verdade.
+
+Regras: não leia nem copie o conteúdo das minhas conversas, não mexa em nada fora da pasta do
+projeto e não exponha o painel na rede.
+```
 
 ### Só quero ver funcionando
 
@@ -97,23 +146,23 @@ Acrescente `?perf=1` ao endereço para ver quadros por segundo, chamadas de dese
 
 Tudo por variável de ambiente; nenhuma é obrigatória. Exporte no terminal ou copie
 [`.env.example`](.env.example) para `.env` na raiz — `npm start`, `npm run demo` e `npm run dev` leem esse
-arquivo sozinhos. (O prefixo `HABBLAUD_` vem do projeto de origem —
-ver [NOTICE.md](NOTICE.md).)
+arquivo sozinhos.
 
 | Variável | Padrão | Para que serve |
 |---|---|---|
-| `HABBLAUD_PORT` | `4750` | Porta do servidor |
-| `HABBLAUD_HOST` | `127.0.0.1` | Endereço de escuta. **Qualquer valor fora de `127.0.0.1` expõe o painel na rede local, sem senha** — o servidor avisa ao iniciar |
-| `HABBLAUD_ALLOWED_HOSTS` | vazio | Nomes extras aceitos no endereço (separados por vírgula). `localhost` e IPs sempre valem; abrir por outro nome sem listá-lo aqui dá erro 421 |
-| `HABBLAUD_DATA_DIR` | `~/.habblaud` | Onde ficam as estatísticas do dia e a linha do tempo (única pasta em que o BuildAgent escreve) |
-| `HABBLAUD_DEMO` | desligado | `1` liga o modo demonstração (igual a `--demo`) |
-| `HABBLAUD_CLAUDE_DIRS` | `~/.claude` | Pastas de conta do Claude Code, separadas por vírgula |
-| `HABBLAUD_CODEX` / `HABBLAUD_CODEX_DIRS` | ligado / `~/.codex` | Fonte Codex |
-| `HABBLAUD_OPENCODE` / `HABBLAUD_OPENCODE_DB` | ligado / banco padrão | Fonte OpenCode |
-| `HABBLAUD_PI` / `HABBLAUD_PI_DIR` | ligado / `~/.pi/agent/sessions` | Fonte Pi |
-| `HABBLAUD_OPENBOT` / `HABBLAUD_OPENBOT_DB` | ligado / banco padrão do app | Cadastro do OpenBot |
-| `HABBLAUD_TIMELINE` | ligado | `0` não grava a linha do tempo usada no replay |
-| `HABBLAUD_LANG` | português | `en` põe os textos do servidor em inglês |
+| `BUILDAGENT_PORT` | `4750` | Porta do servidor |
+| `BUILDAGENT_HOST` | `127.0.0.1` | Endereço de escuta. **Qualquer valor fora de `127.0.0.1` expõe o painel na rede local, sem senha** — o servidor avisa ao iniciar |
+| `BUILDAGENT_ALLOWED_HOSTS` | vazio | Nomes extras aceitos no endereço (separados por vírgula). `localhost` e IPs sempre valem; abrir por outro nome sem listá-lo aqui dá erro 421 |
+| `BUILDAGENT_DATA_DIR` | `~/.buildagent` | Onde ficam as estatísticas do dia e a linha do tempo (única pasta em que o BuildAgent escreve) |
+| `BUILDAGENT_USAGE_DIR` | `~/.buildagent/usage` | Onde o script da statusline grava o uso do plano do Claude Code |
+| `BUILDAGENT_DEMO` | desligado | `1` liga o modo demonstração (igual a `--demo`) |
+| `BUILDAGENT_CLAUDE_DIRS` | `~/.claude` | Pastas de conta do Claude Code, separadas por vírgula |
+| `BUILDAGENT_CODEX` / `BUILDAGENT_CODEX_DIRS` | ligado / `~/.codex` | Fonte Codex |
+| `BUILDAGENT_OPENCODE` / `BUILDAGENT_OPENCODE_DB` | ligado / banco padrão | Fonte OpenCode |
+| `BUILDAGENT_PI` / `BUILDAGENT_PI_DIR` | ligado / `~/.pi/agent/sessions` | Fonte Pi |
+| `BUILDAGENT_OPENBOT` / `BUILDAGENT_OPENBOT_DB` | ligado / banco padrão do app | Cadastro do OpenBot |
+| `BUILDAGENT_TIMELINE` | ligado | `0` não grava a linha do tempo usada no replay |
+| `BUILDAGENT_LANG` | português | `en` põe os textos do servidor em inglês |
 
 ## Uso das contas ao vivo (opcional)
 
@@ -125,15 +174,15 @@ em `~/.claude/settings.json`:
 { "statusLine": { "type": "command", "command": "node /caminho/para/buildagent/scripts/statusline-uso.mjs" } }
 ```
 
-Ele só grava o percentual de uso em `~/.habblaud/usage/` — não lê credenciais nem usa rede. Se você já tem
-uma statusline, ponha o comando dela em `~/.habblaud/statusline-original.txt`: o script a executa em seguida
+Ele só grava o percentual de uso em `~/.buildagent/usage/` — não lê credenciais nem usa rede. Se você já tem
+uma statusline, ponha o comando dela em `~/.buildagent/statusline-original.txt`: o script a executa em seguida
 e a sua barra continua igual.
 
 ## Deixar com a sua cara
 
 Crie a pasta `client/public/local/` (ela fica fora do git) e ponha:
 
-- `predio.json` — `{ "nome": "MINHA EMPRESA" }` troca o letreiro da fachada (até 20 letras, sem acento).
+- `predio.json` — `{ "nome": "MINHA EMPRESA" }` troca o letreiro da fachada (até 20 caracteres; acento é removido).
 - `logo.svg` — vira a logo em relevo na fachada e na recepção.
 - `simbolo.svg` — troca o glifo do painel (canto da barra e da lista) pela sua marca.
 - `fonts/GeneralSans-Variable.woff2` — opcional: fonte do corpo do painel. Não vem no repositório (a licença
@@ -156,7 +205,7 @@ docs/     arquitetura e imagens
 
 - As pessoas andam por corredores fixos e desviam umas das outras ao se cruzar, mas não há desvio de
   móveis em rota livre: em horário cheio ainda pode haver um esbarrão.
-- O cadastro do OpenBot é lido do caminho padrão do macOS; em outros sistemas, aponte `HABBLAUD_OPENBOT_DB`.
+- O cadastro do OpenBot é lido do caminho padrão do macOS; em outros sistemas, aponte `BUILDAGENT_OPENBOT_DB`.
 - Testado no Chrome e no Safari recentes, com WebGL 2.
 
 ## Créditos e licença

@@ -1,5 +1,5 @@
 // Portado de marmottajr/habblaud@faa1a01 server/accounts/accounts.test.ts (MIT)
-// Sem mudança: as variáveis de ambiente e os nomes dos aliases seguem os do Habblaud (HABBLAUD_*) no buildagent.
+// Adaptado: as variáveis de ambiente usam o prefixo BUILDAGENT_; os nomes dos aliases seguem os do original.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -73,7 +73,7 @@ describe('detecção de contas', () => {
     const extra = join(home, 'outra');
     mkdirSync(extra);
     expect(discoverClaudeDirs({ CLAUDE_CONFIG_DIR: extra }, home)).toContain(extra);
-    expect(discoverClaudeDirs({ HABBLAUD_CLAUDE_DIRS: ' /x/a , ~/b ' }, home)).toEqual([resolve('/x/a'), join(home, 'b')]);
+    expect(discoverClaudeDirs({ BUILDAGENT_CLAUDE_DIRS: ' /x/a , ~/b ' }, home)).toEqual([resolve('/x/a'), join(home, 'b')]);
   });
 
   it('pasta do Codex (CODEX_HOME) não vira conta do Claude Code, por nenhum caminho', () => {
@@ -107,12 +107,12 @@ describe('detecção de contas', () => {
 
     expect(discoverClaudeDirs({}, home)).toEqual([join(home, '.claude'), join(home, '.claude-conta2'), misto]);
     expect(codexDirsRefused({}, home)).toEqual([disfarcado]);
-    // CLAUDE_CONFIG_DIR e HABBLAUD_CLAUDE_DIRS apontando para o Codex: fora (o resto da lista segue igual).
+    // CLAUDE_CONFIG_DIR e BUILDAGENT_CLAUDE_DIRS apontando para o Codex: fora (o resto da lista segue igual).
     expect(discoverClaudeDirs({ CLAUDE_CONFIG_DIR: codex }, home)).not.toContain(codex);
     expect(codexDirsRefused({ CLAUDE_CONFIG_DIR: codex }, home)).toEqual([disfarcado, codex]);
-    expect(discoverClaudeDirs({ HABBLAUD_CLAUDE_DIRS: `~/.claude,~/.codex,/x/a` }, home)).toEqual([join(home, '.claude'), resolve('/x/a')]);
-    expect(codexDirsRefused({ HABBLAUD_CLAUDE_DIRS: `~/.claude,~/.codex,/x/a` }, home)).toEqual([codex]);
-    const env = { HABBLAUD_ACCOUNTS: JSON.stringify([{ id: '.codex', mountDir: codex }]) };
+    expect(discoverClaudeDirs({ BUILDAGENT_CLAUDE_DIRS: `~/.claude,~/.codex,/x/a` }, home)).toEqual([join(home, '.claude'), resolve('/x/a')]);
+    expect(codexDirsRefused({ BUILDAGENT_CLAUDE_DIRS: `~/.claude,~/.codex,/x/a` }, home)).toEqual([codex]);
+    const env = { BUILDAGENT_ACCOUNTS: JSON.stringify([{ id: '.codex', mountDir: codex }]) };
     expect(discoverClaudeDirs(env, home)).not.toContain(codex);
   });
 
@@ -148,9 +148,9 @@ describe('detecção de contas', () => {
     expect(JSON.stringify(accs)).not.toContain('nao-pode-vazar');
   });
 
-  it('HABBLAUD_ACCOUNTS (Docker) sobrepõe metadados casando por id ou mountDir', () => {
+  it('BUILDAGENT_ACCOUNTS (Docker) sobrepõe metadados casando por id ou mountDir', () => {
     const env = {
-      HABBLAUD_ACCOUNTS: JSON.stringify([
+      BUILDAGENT_ACCOUNTS: JSON.stringify([
         { id: '.claude', configDir: '/Users/x/.claude', mountDir: join(home, '.claude'), short: 'C', email: 'host@x.com', plan: 'Max', color: '#000000' },
         { mountDir: join(home, '.claude-conta2'), configDir: '/Users/x/.claude-conta2', short: 'D', name: 'Pessoal', cachedUsage: { fetchedAtMs: 5 } },
       ]),

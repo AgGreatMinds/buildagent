@@ -40,12 +40,12 @@ Registro curto das decisões que não dá para ler direto no código. A arquitet
 | **Cabeçalhos em toda resposta** (`server/index.ts`) | `nosniff`, `X-Frame-Options: DENY` e `frame-ancestors 'none'`: o painel não pode ser embutido em outra página. |
 | **Título de sessão sempre mascarado** (`titleOf`, `opencode/db.ts`) | Título custom, nome do agente e título gerado saem da conversa; antes só o último prompt passava pelo mascarador de segredos. |
 | **`git log` ignora a configuração do repositório lido** (`deliveries/git.ts`) | `-c log.showSignature=false -c core.fsmonitor=false`: uma pasta com `.git/config` hostil não manda executar programa. |
+| **Nome antigo saiu do aplicativo** | Variáveis `BUILDAGENT_*`, pasta de dados `~/.buildagent`, chave de idioma lida do navegador `buildagent:locale`. Mudança incompatível, sem leitura dos nomes antigos (`HABBLAUD_*`, `~/.habblaud`): variável antiga é ignorada em silêncio e cai no padrão (que é o mais restrito), e quem usava copia a pasta de dados. O nome do projeto de origem fica só onde a licença MIT exige: cabeçalhos "Portado de / Adaptado de", `NOTICE.md`, `LICENSE-HABBLAUD` e a linha de créditos do README. |
 | **Vitest 5** | A cadeia do Vitest 2 tinha 6 avisos do `npm audit` (2 críticos, só em desenvolvimento). Com o 5, zero. |
 
 ## Limites assumidos
 
 - Sem pathfinding: rotas são retas entre pontos fixos. Em 100 s de demonstração sobra, em média, um
   esbarrão (< 0,35 m) entre pessoas que se cruzam em diagonal.
-- Variáveis de ambiente mantêm o prefixo `HABBLAUD_` do projeto de origem, e `server/config.ts` ainda
-  interpreta opções de partes que não foram portadas (acesso remoto, terminal). Elas não têm efeito.
+- `server/config.ts` ainda interpreta opções de partes que não foram portadas (acesso remoto, terminal). Elas não têm efeito.
 - A interface e os comentários estão em português.

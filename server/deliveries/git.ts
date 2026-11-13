@@ -3,7 +3,7 @@
 // sem rede, sem `fetch`/`push`/`merge`; nada que escreve (até em .git) é executado aqui.
 // `exec` é injetável: em produção é execFile de node:child_process; nos testes, um stub.
 // O número do PR sai da mensagem de merge (Merge pull request #12 / Merge #12 from ...)
-// com prNumberFromText (server/sources/github.ts, portado do Habblaud, MIT).
+// com prNumberFromText (server/sources/github.ts, portado do projeto de origem, MIT).
 import { execFile } from 'node:child_process';
 
 import { prNumberFromText } from '../sources/github';

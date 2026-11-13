@@ -1,5 +1,5 @@
 // Portado de marmottajr/habblaud@faa1a01 server/history/daystats.test.ts (MIT)
-// Adaptado: sem modo demo — o bloco "modo demonstração" do Habblaud não existe no buildagent,
+// Adaptado: sem modo demo — o bloco "modo demonstração" do projeto de origem não existe no buildagent,
 // como não existe o balde de demo do serviço.
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';

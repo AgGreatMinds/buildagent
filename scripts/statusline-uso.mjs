@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Tap de uso do Claude Code: a statusline recebe em stdin um JSON com `rate_limits` (janelas de 5 h e
-// semana da conta). Este script grava esse uso em ~/.habblaud/usage/<conta>.json (formato lido por
+// semana da conta). Este script grava esse uso em ~/.buildagent/usage/<conta>.json (formato lido por
 // server/accounts/statusline.ts) e depois roda a statusline ORIGINAL do usuário com o mesmo stdin,
 // então a barra do Claude Code continua igual. Não lê credenciais, não usa rede, e qualquer falha
 // aqui é engolida: a statusline original sempre roda e o exit code é sempre 0.
@@ -10,8 +10,8 @@ import { homedir } from 'node:os';
 import { basename, join } from 'node:path';
 
 const home = homedir();
-const pasta = process.env.HABBLAUD_USAGE_DIR?.trim() || join(home, '.habblaud', 'usage');
-const arquivoOriginal = join(home, '.habblaud', 'statusline-original.txt');
+const pasta = process.env.BUILDAGENT_USAGE_DIR?.trim() || join(home, '.buildagent', 'usage');
+const arquivoOriginal = join(home, '.buildagent', 'statusline-original.txt');
 
 let entrada = '';
 try { entrada = readFileSync(0, 'utf8'); } catch { /* sem stdin: roda a original vazia */ }

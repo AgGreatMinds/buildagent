@@ -1,7 +1,7 @@
 // Portado de marmottajr/habblaud@faa1a01 server/accounts/usage.ts (MIT)
 // Uso do plano (sessão de 5h e semanal) por conta, vindo de fontes locais:
 // - 'statusline': rate_limits que o Claude Code envia ao statusline, gravados no usageDir
-//   (no buildagent, sem o tap de statusline do Habblaud — a escrita fica fora do escopo);
+//   (no buildagent, sem o tap de statusline do projeto de origem — a escrita fica fora do escopo);
 // - 'cache': cachedUsageUtilization gravado pelo próprio Claude Code (quando alguém roda /usage);
 // - 'codex': rate_limits dos arquivos de sessão do Codex, empurrados pela fonte do Codex (AccountsService.setUsage).
 // Vale sempre a fonte com os números mais recentes (maior fetchedAt). Nenhuma delas lê credenciais

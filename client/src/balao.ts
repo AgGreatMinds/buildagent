@@ -1,7 +1,7 @@
 // Adaptado de marmottajr/habblaud@faa1a01 client/src/art/dynamic.ts (MIT)
 // Balão de atividade acima da pessoa na cena 3D: um sprite com CanvasTexture PRÓPRIA por
 // pessoa (texto difere por pessoa; não há textura compartilhada), redesenhada só quando o
-// texto muda — nada de custo por quadro. Cortado do Habblaud: só a renderização do sprite
+// texto muda — nada de custo por quadro. Cortado do projeto de origem: só a renderização do sprite
 // ficou; a lógica 2D de cumprimentos (world/city/social.ts) e a animação "pop" não vieram.
 import * as THREE from 'three';
 import type { Destino, Estado } from './vida/tipos';
